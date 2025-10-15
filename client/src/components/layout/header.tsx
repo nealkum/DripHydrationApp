@@ -19,13 +19,12 @@ export function Header() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group" data-testid="link-logo">
+          <Link href="/" className="group" data-testid="link-logo">
             <img 
               src={logoPath} 
               alt="Drip Hydration Logo" 
-              className="h-10 w-auto transition-transform group-hover:scale-105"
+              className="h-14 w-auto transition-transform group-hover:scale-105"
             />
-            <span className="text-2xl font-bold text-primary">Drip Hydration</span>
           </Link>
 
           {/* Desktop Navigation */}
