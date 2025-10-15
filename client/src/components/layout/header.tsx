@@ -1,8 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Droplet, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import logoPath from "@assets/drip logo_1760551470270.png";
 
 export function Header() {
   const [location] = useLocation();
@@ -19,8 +19,12 @@ export function Header() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group" data-testid="link-logo">
-            <Droplet className="w-7 h-7 text-primary transition-transform group-hover:scale-110" />
+          <Link href="/" className="flex items-center gap-3 group" data-testid="link-logo">
+            <img 
+              src={logoPath} 
+              alt="Drip Hydration Logo" 
+              className="h-10 w-auto transition-transform group-hover:scale-105"
+            />
             <span className="text-2xl font-bold text-primary">Drip Hydration</span>
           </Link>
 
