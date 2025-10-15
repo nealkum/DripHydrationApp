@@ -178,10 +178,10 @@ export default function Membership() {
                   <Button 
                     className="w-full font-semibold uppercase" 
                     variant={plan.popular ? "default" : "outline"}
-                    asChild
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     data-testid={`button-join-${plan.name.toLowerCase()}`}
                   >
-                    <Link href="/treatments">Join Now</Link>
+                    Contact Us
                   </Button>
                 </CardContent>
               </Card>
