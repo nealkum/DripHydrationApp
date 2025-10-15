@@ -18,11 +18,9 @@ export function Header() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2" data-testid="link-logo">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <Droplet className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-serif text-xl font-semibold text-foreground">Drip Hydration</span>
+          <Link href="/" className="flex items-center gap-2 group" data-testid="link-logo">
+            <Droplet className="w-7 h-7 text-primary transition-transform group-hover:scale-110" />
+            <span className="text-2xl font-bold text-primary">Drip Hydration</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -41,8 +39,8 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:block">
-            <Button asChild data-testid="button-book-treatment">
-              <Link href="/treatments">Book Treatment</Link>
+            <Button asChild size="lg" className="font-semibold uppercase" data-testid="button-book-treatment">
+              <Link href="/treatments">Book Now</Link>
             </Button>
           </div>
 
@@ -74,12 +72,12 @@ export function Header() {
               </Button>
             ))}
             <Button 
-              className="w-full" 
+              className="w-full font-semibold uppercase" 
               asChild
               onClick={() => setMobileMenuOpen(false)}
               data-testid="mobile-button-book-treatment"
             >
-              <Link href="/treatments">Book Treatment</Link>
+              <Link href="/treatments">Book Now</Link>
             </Button>
           </div>
         )}
