@@ -89,7 +89,7 @@ Preferred communication style: Simple, everyday language.
 
 **Homepage Sections**
 - Simplified hero with clear value proposition and trust badge
-- Trust bar with 4.9 star rating, 150,000+ treatments, 100+ cities, Licensed ER/ICU RNs
+- Trust bar with 4.9 star rating, 200,000+ treatments, 100+ cities, Doctor-Owned & Directed, Celebrating 10 Years
 - Symptom-based navigation ("What do you need help with?") linking to treatments
 - Category cards for browsing Vitamin & Wellness IVs and NAD+ Therapy
 - How It Works 4-step visual section (Choose, Book, Relax, Feel Better)
@@ -98,20 +98,52 @@ Preferred communication style: Simple, everyday language.
 - FAQ accordion section with common questions
 - Footer with trust/safety badges, contact info, certifications
 
+**Treatment Card CRO Enhancements**
+- "Best For" colored badges (amber/green/blue/etc.) mapping treatments to use cases
+- Dual pricing display: one-time price + member price with savings badge
+- Star ratings with review counts on every treatment card
+- Centralized treatment-data.ts module for ingredients, reviews, member pricing, add-ons
+
 **Treatment Detail Enhancements**
 - Ingredient tags/badges showing IV contents
 - Mini "How It Works" section
 - FAQ accordion for treatment-specific questions
-- "Customers Also Booked" related treatments section
-- Sticky CTA with price shown in button text
-- Star ratings displayed
+- "Customers Also Booked" related treatments section with member pricing
+- Sticky CTA with dynamic price (includes add-ons)
+- Star ratings with review counts
+- Evidence-based positioning card (100% bioavailability, physician-formulated)
+- Add-ons section: selectable vitamin boosts (+$20-35 each) with dynamic total
+- Treatment-specific customer reviews (3 per treatment with name, city, rating)
+- Membership upsell card with savings calculation
+- Treatment trust bar (painless treatment, nurse monitors vitals, session length)
+
+**Checkout CRO Enhancements**
+- Subscribe & Save toggle: click to apply member pricing at checkout with savings display
+- Checkout trust bar: 256-bit SSL, Licensed Nurses, 4.9 stars
+- Price updates dynamically when Subscribe & Save is toggled
+
+**Confirmation Page Upsells**
+- Membership upsell card with plans link
+- Group booking upsell card
+- Refer-a-friend card ($25 give/$25 get)
+
+**Group Booking**
+- Dedicated group booking page at /group-booking
+- Group size selector with tiered discounts (10-20% off)
+- Event type selector (bachelorette, corporate, sports team, etc.)
+- Inquiry form with contact details, city, date, guest count
+- Trust signals and group-specific messaging
+- Footer link to group booking page
 
 **User Experience Features**
+- Bottom tab bar navigation on mobile (Home, Treatments, Book, Membership, Account)
+- Tab bar hidden during booking flow and confirmation page
 - Sticky bottom CTA bar on all non-booking pages
 - Step indicator component for booking progress visualization
 - Form validation at each step with error feedback
 - Session-based state preservation across booking steps
 - Responsive layout adapting to mobile and desktop viewports
+- Scroll-to-top on all page navigations
 
 ### Build & Deployment
 

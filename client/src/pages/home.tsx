@@ -119,15 +119,19 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1.5" data-testid="trust-treatments">
               <Users className="w-4 h-4 text-primary" />
-              <span><span className="font-semibold text-foreground">150,000+</span> treatments</span>
+              <span><span className="font-semibold text-foreground">200,000+</span> treatments</span>
             </div>
             <div className="flex items-center gap-1.5" data-testid="trust-cities">
               <MapPin className="w-4 h-4 text-primary" />
               <span><span className="font-semibold text-foreground">100+</span> cities</span>
             </div>
             <div className="flex items-center gap-1.5" data-testid="trust-nurses">
+              <Stethoscope className="w-4 h-4 text-primary" />
+              <span><span className="font-semibold text-foreground">Doctor-Owned</span> & Directed</span>
+            </div>
+            <div className="flex items-center gap-1.5" data-testid="trust-years">
               <Award className="w-4 h-4 text-primary" />
-              <span>Licensed <span className="font-semibold text-foreground">ER/ICU RNs</span></span>
+              <span>Celebrating <span className="font-semibold text-foreground">10 Years</span></span>
             </div>
           </div>
         </div>

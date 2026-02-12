@@ -2,21 +2,9 @@ import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Clock, Star } from "lucide-react";
 import type { Treatment } from "@shared/schema";
-
-const ingredientMap: Record<string, string[]> = {
-  "myers-cocktail-plus": ["B-Complex", "B12", "Vitamin C", "Magnesium", "Glutathione", "Biotin", "Zinc"],
-  "immunity-boost": ["B-Complex", "B12", "Vitamin C", "Glutathione"],
-  "energy-boost": ["B-Complex", "B12", "Vitamin C"],
-  "hydration-package": ["IV Fluids", "Electrolytes"],
-  "beauty-drip": ["B-Complex", "B12", "Vitamin C", "Biotin", "Glutathione"],
-  "hangover-iv": ["B-Complex", "B12", "Vitamin C", "Anti-Nausea", "Anti-Inflammatory"],
-  "recovery-performance": ["B-Complex", "B12", "Vitamin C", "Magnesium", "Glutathione"],
-  "migraine-relief": ["B12", "Magnesium", "Anti-Nausea", "Anti-Inflammatory"],
-  "nad-iv-therapy": ["500mg NAD+"],
-  "nad-boost": ["NAD+", "B-Complex", "B12", "Vitamin C", "Magnesium", "Glutathione"],
-};
+import { ingredientMap, bestForMap, reviewMap, memberPriceMap } from "@/lib/treatment-data";
 
 interface TreatmentCardProps {
   treatment: Treatment & { categorySlug?: string };
@@ -25,12 +13,16 @@ interface TreatmentCardProps {
 export function TreatmentCard({ treatment }: TreatmentCardProps) {
   const formattedPrice = (treatment.price / 100).toFixed(0);
   const ingredients = ingredientMap[treatment.slug] || [];
-  
+  const bestFor = bestForMap[treatment.slug];
+  const reviews = reviewMap[treatment.slug];
+  const memberPrice = memberPriceMap[treatment.slug];
+  const memberFormatted = memberPrice ? (memberPrice / 100).toFixed(0) : null;
+  const savings = memberPrice ? treatment.price - memberPrice : 0;
+  const savingsFormatted = (savings / 100).toFixed(0);
+
   const isFeatured = treatment.name.includes("Myers Cocktail") || 
                      treatment.name.includes("NAD+ Boost") ||
                      treatment.price >= 39900;
-
-  const isBestSeller = treatment.name.includes("Hangover") || treatment.name.includes("Immunity");
 
   const durationText = treatment.duration >= 60 
     ? `${Math.floor(treatment.duration / 60)}-${Math.floor(treatment.duration / 60) + 1} hrs`
@@ -42,29 +34,42 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
       data-testid={`card-treatment-${treatment.id}`}
     >
       <div className="p-6 flex flex-col flex-1 relative">
-        <div className="flex items-center gap-2 absolute top-3 right-3">
+        <div className="flex items-center gap-2 absolute top-3 right-3 flex-wrap justify-end">
           {isFeatured && (
             <Badge className="bg-primary text-primary-foreground font-semibold uppercase text-xs" data-testid={`badge-popular-${treatment.id}`}>
               Most Popular
             </Badge>
           )}
-          {isBestSeller && !isFeatured && (
-            <Badge variant="secondary" className="font-semibold uppercase text-xs" data-testid={`badge-bestseller-${treatment.id}`}>
-              Best Seller
-            </Badge>
-          )}
         </div>
+
+        {bestFor && (
+          <Badge variant="outline" className={`self-start text-xs font-medium mb-2 no-default-hover-elevate no-default-active-elevate ${bestFor.color}`} data-testid={`badge-bestfor-${treatment.id}`}>
+            {bestFor.label}
+          </Badge>
+        )}
         
         <h3 
-          className="text-xl font-semibold mb-1 pr-24" 
+          className={`text-xl font-semibold mb-1 ${isFeatured ? 'pr-24' : ''}`}
           data-testid={`text-treatment-name-${treatment.id}`}
         >
           {treatment.name}
         </h3>
 
-        <div className="flex items-center gap-3 mb-3 flex-wrap">
+        {reviews && (
+          <div className="flex items-center gap-1.5 mb-2" data-testid={`rating-${treatment.id}`}>
+            <div className="flex">
+              {[1,2,3,4,5].map(i => (
+                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              ))}
+            </div>
+            <span className="text-sm font-semibold text-foreground">{reviews.rating}</span>
+            <span className="text-xs text-muted-foreground">({reviews.count.toLocaleString()} reviews)</span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 mb-1 flex-wrap">
           <span 
-            className="text-2xl font-bold text-primary"
+            className="text-2xl font-bold text-foreground"
             data-testid={`text-price-${treatment.id}`}
           >
             ${formattedPrice}
@@ -74,24 +79,34 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
             {durationText}
           </span>
           <Badge variant="outline" className="text-[10px] font-medium border-primary/30 text-primary no-default-hover-elevate no-default-active-elevate" data-testid={`badge-hsa-${treatment.id}`}>
-            HSA/FSA Eligible
+            HSA/FSA
           </Badge>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+        {memberFormatted && (
+          <div className="flex items-center gap-2 mb-3" data-testid={`member-price-${treatment.id}`}>
+            <span className="text-lg font-bold text-primary">${memberFormatted}</span>
+            <span className="text-xs text-muted-foreground">with membership</span>
+            <Badge variant="outline" className="text-[10px] font-semibold border-green-300 bg-green-50 text-green-700 no-default-hover-elevate no-default-active-elevate">
+              Save ${savingsFormatted}
+            </Badge>
+          </div>
+        )}
+
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
           {treatment.description}
         </p>
 
         {ingredients.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4" data-testid={`ingredients-${treatment.id}`}>
-            {ingredients.slice(0, 5).map((ingredient) => (
+            {ingredients.slice(0, 4).map((ingredient) => (
               <Badge key={ingredient} variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
                 {ingredient}
               </Badge>
             ))}
-            {ingredients.length > 5 && (
+            {ingredients.length > 4 && (
               <Badge variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
-                +{ingredients.length - 5} more
+                +{ingredients.length - 4} more
               </Badge>
             )}
           </div>

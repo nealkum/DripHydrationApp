@@ -96,7 +96,7 @@ export default function Membership() {
               </Button>
             </div>
             <p className="text-primary-foreground/80 font-medium pt-4">
-              150,000+ happy patients served
+              200,000+ happy patients served
             </p>
           </div>
         </div>

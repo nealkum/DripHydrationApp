@@ -20,6 +20,7 @@ export function Footer() {
               <li><Link href="/treatments/vitamin-wellness" className="transition-colors" data-testid="link-vitamin-wellness">Vitamin & Wellness IVs</Link></li>
               <li><Link href="/treatments/nad-therapy" className="transition-colors" data-testid="link-nad-therapy">NAD+ Therapy</Link></li>
               <li><Link href="/membership" className="transition-colors" data-testid="link-membership">Membership Plans</Link></li>
+              <li><Link href="/group-booking" className="transition-colors" data-testid="link-group-booking">Group Bookings</Link></li>
             </ul>
           </div>
 

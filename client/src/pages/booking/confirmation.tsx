@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, Calendar, MapPin, Clock, User } from "lucide-react";
+import { CheckCircle2, Calendar, MapPin, Clock, User, Star, Users, Gift, ArrowRight } from "lucide-react";
 import type { Appointment, Treatment, City } from "@shared/schema";
 import { Link } from "wouter";
 
@@ -160,7 +160,7 @@ export default function BookingConfirmation() {
           </CardContent>
         </Card>
 
-        <Card className="bg-accent/50">
+        <Card className="bg-accent/50 mb-6">
           <CardContent className="pt-6">
             <h3 className="font-semibold text-foreground mb-3">What's Next?</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -184,10 +184,62 @@ export default function BookingConfirmation() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+        {/* Upsell Cards */}
+        <div className="grid sm:grid-cols-3 gap-4 mb-8" data-testid="section-upsells">
+          <Card className="border-primary/20 bg-primary/5" data-testid="card-upsell-membership">
+            <CardContent className="p-4 flex flex-col h-full">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <Star className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-semibold text-foreground text-sm mb-1">Save with Membership</h4>
+              <p className="text-xs text-muted-foreground flex-1 mb-3">
+                Save up to 40% on every treatment with a monthly plan. Starting at $295/mo.
+              </p>
+              <Button variant="outline" size="sm" className="w-full font-semibold uppercase text-xs" asChild data-testid="button-upsell-membership">
+                <Link href="/membership">
+                  View Plans <ArrowRight className="w-3 h-3 ml-1" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-upsell-group">
+            <CardContent className="p-4 flex flex-col h-full">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-semibold text-foreground text-sm mb-1">Group Booking</h4>
+              <p className="text-xs text-muted-foreground flex-1 mb-3">
+                Book for 2+ people and save up to 20% per person. Great for events.
+              </p>
+              <Button variant="outline" size="sm" className="w-full font-semibold uppercase text-xs" asChild data-testid="button-upsell-group">
+                <Link href="/group-booking">
+                  Learn More <ArrowRight className="w-3 h-3 ml-1" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-upsell-refer">
+            <CardContent className="p-4 flex flex-col h-full">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                <Gift className="w-5 h-5 text-primary" />
+              </div>
+              <h4 className="font-semibold text-foreground text-sm mb-1">Refer a Friend</h4>
+              <p className="text-xs text-muted-foreground flex-1 mb-3">
+                Give $25, get $25 when you refer friends to Drip Hydration.
+              </p>
+              <Button variant="outline" size="sm" className="w-full font-semibold uppercase text-xs" data-testid="button-upsell-refer">
+                Share <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
           <Button 
             size="lg" 
-            className="flex-1 h-12 font-semibold uppercase"
+            className="flex-1 font-semibold uppercase"
             asChild
             data-testid="button-book-another"
           >
@@ -196,7 +248,7 @@ export default function BookingConfirmation() {
           <Button 
             size="lg" 
             variant="outline" 
-            className="flex-1 h-12 font-semibold uppercase"
+            className="flex-1 font-semibold uppercase"
             asChild
             data-testid="button-home"
           >
