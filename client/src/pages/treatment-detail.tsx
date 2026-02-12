@@ -104,10 +104,13 @@ export default function TreatmentDetail() {
         <div className="space-y-8">
           {/* Header */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <Badge variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
                 <Shield className="w-3 h-3 mr-1" />
                 Licensed RN Administered
+              </Badge>
+              <Badge variant="outline" className="text-xs font-medium border-primary/30 text-primary no-default-hover-elevate no-default-active-elevate" data-testid="badge-hsa-fsa">
+                HSA/FSA Eligible
               </Badge>
             </div>
             <h1 className="text-4xl md:text-5xl font-semibold text-foreground mb-4" data-testid="text-treatment-name">

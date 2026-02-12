@@ -62,7 +62,7 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
           {treatment.name}
         </h3>
 
-        <div className="flex items-baseline gap-3 mb-3">
+        <div className="flex items-center gap-3 mb-3 flex-wrap">
           <span 
             className="text-2xl font-bold text-primary"
             data-testid={`text-price-${treatment.id}`}
@@ -73,6 +73,9 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
             <Clock className="w-3 h-3" />
             {durationText}
           </span>
+          <Badge variant="outline" className="text-[10px] font-medium border-primary/30 text-primary no-default-hover-elevate no-default-active-elevate" data-testid={`badge-hsa-${treatment.id}`}>
+            HSA/FSA Eligible
+          </Badge>
         </div>
 
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
