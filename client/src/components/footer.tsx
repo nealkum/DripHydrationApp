@@ -8,7 +8,7 @@ export function Footer() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           <div>
-            <img src={logoPath} alt="Drip Hydration" className="h-10 w-auto mb-4" />
+            <img src={logoPath} alt="Drip Hydration" className="h-10 w-auto mb-4" style={{ filter: "brightness(0) invert(1)" }} />
             <p className="text-sm text-muted-foreground leading-relaxed">
               The global leader in mobile IV therapy. Premium in-home treatments delivered by licensed registered nurses.
             </p>
