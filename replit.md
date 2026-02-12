@@ -21,9 +21,10 @@ Preferred communication style: Simple, everyday language.
 - Shadcn/ui component library (New York style variant) with Radix UI primitives
 - Tailwind CSS for utility-first styling with custom design tokens
 - CSS variables for consistent theming (light mode only - clean white medical aesthetic)
-- Drip Hydration brand colors: Teal primary (#00B8B0), white backgrounds, near-black text
-- Treatment cards without product images for cleaner design aesthetic
-- All CTAs styled with uppercase text and teal branding
+- Drip Hydration brand colors: Dark teal primary (#367588 / HSL 194 43% 37%), white backgrounds, near-black text
+- Treatment cards without product images, with ingredient tags and Book Now + Details buttons
+- All CTAs styled with uppercase text and brand teal styling
+- Sticky bottom CTA bar on all pages (hidden during booking flow)
 
 **State Management**
 - TanStack Query (React Query) for server state management and data fetching
@@ -34,9 +35,10 @@ Preferred communication style: Simple, everyday language.
 - Typography: Inter (primary font) - clean, medical-grade readability
 - Mobile-first responsive design approach
 - Professional healthcare aesthetic matching driphydration.com branding
-- Teal primary color (#00B8B0 / HSL 174 100% 36%) with white backgrounds
+- Dark teal primary color (#367588 / HSL 194 43% 37%) with white backgrounds
 - Uppercase button styling for all CTAs with font-weight 600
 - Custom button, card, and elevation variants for consistent UX
+- Logo-only header (no text next to logo), larger logo size (h-14)
 
 ### Backend Architecture
 
@@ -85,7 +87,27 @@ Preferred communication style: Simple, everyday language.
 4. Payment and contact information
 5. Confirmation with appointment details
 
+**Homepage Sections**
+- Simplified hero with clear value proposition and trust badge
+- Trust bar with 4.9 star rating, 150,000+ treatments, 100+ cities, Licensed ER/ICU RNs
+- Symptom-based navigation ("What do you need help with?") linking to treatments
+- Category cards for browsing Vitamin & Wellness IVs and NAD+ Therapy
+- How It Works 4-step visual section (Choose, Book, Relax, Feel Better)
+- Client testimonials with star ratings
+- Membership upsell card with savings info
+- FAQ accordion section with common questions
+- Footer with trust/safety badges, contact info, medical director, certifications
+
+**Treatment Detail Enhancements**
+- Ingredient tags/badges showing IV contents
+- Mini "How It Works" section
+- FAQ accordion for treatment-specific questions
+- "Customers Also Booked" related treatments section
+- Sticky CTA with price shown in button text
+- Star ratings displayed
+
 **User Experience Features**
+- Sticky bottom CTA bar on all non-booking pages
 - Step indicator component for booking progress visualization
 - Form validation at each step with error feedback
 - Session-based state preservation across booking steps
