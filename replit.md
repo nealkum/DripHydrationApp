@@ -96,7 +96,7 @@ Preferred communication style: Simple, everyday language.
 - Client testimonials with star ratings
 - Membership upsell card with savings info
 - FAQ accordion section with common questions
-- Footer with trust/safety badges, contact info, medical director, certifications
+- Footer with trust/safety badges, contact info, certifications
 
 **Treatment Detail Enhancements**
 - Ingredient tags/badges showing IV contents

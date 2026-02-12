@@ -44,7 +44,7 @@ const testimonials = [
 const faqItems = [
   {
     question: "Is IV therapy safe?",
-    answer: "Yes, all treatments are administered by licensed Registered Nurses with ER/ICU backgrounds. Our medical team is directed by Dr. Abe Malkin, MD/MBA. Every patient receives a medical screening before treatment.",
+    answer: "Yes, all treatments are administered by licensed Registered Nurses with ER/ICU backgrounds. Our medical team is directed by Dr. Jon Snipes, MD. Every patient receives a medical screening before treatment.",
   },
   {
     question: "How quickly can a nurse arrive?",

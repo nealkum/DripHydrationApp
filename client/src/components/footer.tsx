@@ -61,10 +61,7 @@ export function Footer() {
         </div>
 
         <div className="border-t pt-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">
-              Medical Director: Dr. Abe Malkin, MD/MBA (Tufts University)
-            </p>
+          <div className="flex items-center justify-center">
             <p className="text-xs text-muted-foreground">
               &copy; {new Date().getFullYear()} Drip Hydration. All rights reserved.
             </p>
