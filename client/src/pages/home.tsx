@@ -75,10 +75,6 @@ export default function Home() {
       <section className="relative bg-primary/5 py-16 md:py-24" data-testid="section-hero">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center max-w-4xl mx-auto space-y-6">
-            <Badge variant="secondary" className="text-sm px-4 py-1.5" data-testid="badge-trust">
-              <Stethoscope className="w-3.5 h-3.5 mr-1.5" />
-              All treatments by licensed Registered Nurses
-            </Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-foreground">
               Premium IV Therapy — <span className="text-primary">Delivered to You</span>
             </h1>
