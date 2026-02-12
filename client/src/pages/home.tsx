@@ -243,7 +243,7 @@ export default function Home() {
               Experience seamless wellness with our at-home IV therapy.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
               {
                 step: "1",
@@ -259,15 +259,9 @@ export default function Home() {
               },
               {
                 step: "3",
-                icon: Stethoscope,
-                title: "Relax",
-                description: "A licensed RN arrives at your location with everything needed.",
-              },
-              {
-                step: "4",
                 icon: CheckCircle2,
                 title: "Feel Better",
-                description: "Treatment takes 30-60 min. Resume your day refreshed.",
+                description: "A licensed RN arrives at your location. Treatment takes 30-60 min.",
               },
             ].map((item) => {
               const Icon = item.icon;
