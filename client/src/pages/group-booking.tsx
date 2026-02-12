@@ -101,7 +101,7 @@ export default function GroupBooking() {
         <div className="flex flex-wrap justify-center gap-6 mb-10 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            4.9 rating from 200,000+ treatments
+            4.9 rating from 100,000+ treatments
           </span>
           <span className="flex items-center gap-1.5">
             <Shield className="w-3.5 h-3.5 text-primary" />

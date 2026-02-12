@@ -83,7 +83,7 @@ export default function Membership() {
                 asChild
                 data-testid="button-join-now"
               >
-                <Link href="#plans">Join Now</Link>
+                <a href="#plans">Join Now</a>
               </Button>
               <Button 
                 size="lg" 
@@ -92,11 +92,11 @@ export default function Membership() {
                 asChild
                 data-testid="button-view-plans"
               >
-                <Link href="#plans">View Plans</Link>
+                <a href="#plans">View Plans</a>
               </Button>
             </div>
             <p className="text-primary-foreground/80 font-medium pt-4">
-              200,000+ happy patients served
+              100,000+ happy patients served
             </p>
           </div>
         </div>

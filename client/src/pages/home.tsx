@@ -119,7 +119,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-1.5" data-testid="trust-treatments">
               <Users className="w-4 h-4 text-primary" />
-              <span><span className="font-semibold text-foreground">200,000+</span> treatments</span>
+              <span><span className="font-semibold text-foreground">100,000+</span> treatments</span>
             </div>
             <div className="flex items-center gap-1.5" data-testid="trust-cities">
               <MapPin className="w-4 h-4 text-primary" />

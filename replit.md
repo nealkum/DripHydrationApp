@@ -89,7 +89,7 @@ Preferred communication style: Simple, everyday language.
 
 **Homepage Sections**
 - Simplified hero with clear value proposition and trust badge
-- Trust bar with 4.9 star rating, 200,000+ treatments, 100+ cities, Doctor-Owned & Directed, Celebrating 10 Years
+- Trust bar with 4.9 star rating, 100,000+ treatments, 100+ cities, Doctor-Owned & Directed, Celebrating 10 Years
 - Symptom-based navigation ("What do you need help with?") linking to treatments
 - Category cards for browsing Vitamin & Wellness IVs and NAD+ Therapy
 - How It Works 4-step visual section (Choose, Book, Relax, Feel Better)
