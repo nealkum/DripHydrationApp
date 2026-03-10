@@ -24,7 +24,6 @@ export function Header() {
               src={logoPath} 
               alt="Drip Hydration Logo" 
               className="h-14 w-auto transition-transform group-hover:scale-105"
-              style={{ filter: "brightness(0) invert(1)" }}
             />
           </Link>
 
