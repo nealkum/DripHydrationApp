@@ -30,7 +30,7 @@
 
   --sidebar-border: 220 10% 88%;
 
-  --sidebar-primary: 166 39% 55%;
+  --sidebar-primary: 191 48% 42%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
@@ -38,7 +38,7 @@
 
   --sidebar-accent-foreground: 220 15% 12%;
 
-  --sidebar-ring: 166 39% 55%;
+  --sidebar-ring: 191 48% 42%;
 
   --popover: 0 0% 100%;
 
@@ -46,7 +46,7 @@
 
   --popover-border: 220 10% 88%;
 
-  --primary: 166 39% 42%;
+  --primary: 191 48% 36%;
 
   --primary-foreground: 0 0% 100%;
 
@@ -67,12 +67,12 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 220 10% 88%;
-  --ring: 166 39% 42%;
-  --chart-1: 166 39% 55%;
-  --chart-2: 180 65% 65%;
-  --chart-3: 150 55% 60%;
+  --ring: 191 48% 36%;
+  --chart-1: 191 48% 42%;
+  --chart-2: 180 55% 50%;
+  --chart-3: 200 55% 55%;
   --chart-4: 210 55% 65%;
-  --chart-5: 230 65% 70%;
+  --chart-5: 220 50% 60%;
 
   --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
