@@ -59,12 +59,13 @@ Preferred communication style: Simple, everyday language.
 - Response formatting with consistent error handling
 
 **Database Schema**
-- Categories: Treatment groupings (Vitamin & Wellness, NAD+ Therapy)
+- Categories: Treatment groupings (Vitamin & Wellness, NAD+ Therapy, Shipped To You)
 - Treatments: Individual services with pricing, duration, benefits, and descriptions
 - Cities: Service locations with region grouping
 - Appointments: Customer bookings with address, scheduling, and contact information
 
-**Note:** Injectable Boosters category has been removed from the application.
+**Shipped To You Category (13 treatments):**
+NAD+ Injections, NAD+ Nasal Spray, Niagen® NR Injections, Sermorelin (Peptide), CJC-1295/Ipamorelin (Peptide), GHK-Cu Cream (Peptide), Semaglutide (Weight Loss), Tirzepatide (Weight Loss), TRT Injections (Testosterone), Enclomiphene (Testosterone), Vitamin B-12 Injections, Lipostat+ Injections, Ketamine Therapy
 
 ### Core Features
 
@@ -77,10 +78,10 @@ Preferred communication style: Simple, everyday language.
 - Dedicated membership page accessible from homepage hero and header navigation
 
 **Treatment Selection Flow**
-- Category overview page showing two main treatment categories
+- Category overview page showing three treatment categories
 - Category detail pages displaying individual treatments within each category
 - Click-through navigation from category cards to detailed treatment listings
-- 2-column grid layout for better visual balance with two categories
+- 3-column grid layout on homepage and treatments overview page
 
 **Core Booking Flow**
 1. Treatment selection from categorized catalog

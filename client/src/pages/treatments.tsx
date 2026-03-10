@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Category } from "@shared/schema";
 import { Link } from "wouter";
-import { Droplet, Zap } from "lucide-react";
+import { Droplet, Zap, Package, type LucideIcon } from "lucide-react";
 
 export default function Treatments() {
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
@@ -27,10 +27,11 @@ export default function Treatments() {
     );
   }
 
-  const categoryIcons = {
+  const categoryIcons: Record<string, LucideIcon> = {
     "vitamin-wellness": Droplet,
     "nad-therapy": Zap,
-  } as const;
+    "shipped-to-you": Package,
+  };
 
   return (
     <div className="min-h-screen py-12">
@@ -40,13 +41,13 @@ export default function Treatments() {
             Service Overview
           </h1>
           <p className="text-lg text-muted-foreground">
-            Explore our range of in-home vitamin IV treatments designed for optimal health.
+            Browse in-home IV therapy, NAD+ treatments, and at-home products shipped directly to you.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6">
           {categories?.map((category) => {
-            const Icon = categoryIcons[category.slug as keyof typeof categoryIcons] || Droplet;
+            const Icon = categoryIcons[category.slug] || Droplet;
             return (
               <Card 
                 key={category.id} 

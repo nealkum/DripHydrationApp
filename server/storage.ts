@@ -284,6 +284,235 @@ export class MemStorage implements IStorage {
       imageUrl: null,
     });
 
+    // Shipped To You Category
+    const shippedToYou = await this.createCategory({
+      name: "Shipped To You",
+      description: "At-home treatments shipped directly to your door — peptides, weight loss, testosterone, vitamin injections, and more",
+      slug: "shipped-to-you",
+    });
+
+    // Shipped To You Treatments
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "NAD+ Injections",
+      slug: "nad-injections",
+      description: "Our self-administered NAD+ injections quickly replenish NAD levels to promote anti-aging benefits such as increased energy, improved brain clarity and focus, improved metabolic function, and more.",
+      benefits: [
+        "Powerful anti-aging support",
+        "Increased energy and vitality",
+        "Improved brain clarity and focus",
+        "Supports metabolic function",
+        "Enhanced cellular repair"
+      ],
+      duration: 5,
+      price: 24900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "NAD+ Nasal Spray",
+      slug: "nad-nasal-spray",
+      description: "Self-administered NAD+ nasal spray that quickly replenishes NAD levels. Faster access to brain cells than oral supplements for quicker results.",
+      benefits: [
+        "Anti-aging benefits",
+        "Mental clarity and focus",
+        "Energy boost",
+        "Detox and cellular cleanse",
+        "Convenient self-administration"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Niagen® NR Injections",
+      slug: "niagen-nr-injections",
+      description: "Self-administered Niagen® NR (Nicotinamide Riboside) injections that replenish NAD+ levels to support longevity, cognitive function, and overall vitality.",
+      benefits: [
+        "Replenishes NAD+ levels",
+        "Supports longevity and anti-aging",
+        "Improved cognitive function",
+        "Increased energy production",
+        "Enhanced metabolic health"
+      ],
+      duration: 5,
+      price: 39900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Sermorelin (Peptide Therapy)",
+      slug: "peptide-sermorelin",
+      description: "Sermorelin stimulates receptors in the brain to naturally release growth hormones, supporting anti-aging, fat loss, and lean muscle development.",
+      benefits: [
+        "Stimulates natural growth hormone release",
+        "Supports lean muscle growth",
+        "Reduces body fat",
+        "Improves sleep quality",
+        "Anti-aging and recovery"
+      ],
+      duration: 10,
+      price: 39900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "CJC-1295 / Ipamorelin (Peptide)",
+      slug: "peptide-cjc-ipamorelin",
+      description: "A top-selling synthetic peptide combination that stimulates growth hormone secretion for improved body composition, recovery, and performance.",
+      benefits: [
+        "Stimulates growth hormone secretion",
+        "Improves body composition",
+        "Faster muscle recovery",
+        "Increased energy and endurance",
+        "Supports fat metabolism"
+      ],
+      duration: 10,
+      price: 49900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "GHK-Cu Cream (Peptide Therapy)",
+      slug: "peptide-ghk-cu",
+      description: "GHK-Cu is a naturally-occurring plasma copper peptide that significantly declines with age. This topical cream supports skin rejuvenation and anti-aging.",
+      benefits: [
+        "Stimulates collagen production",
+        "Reduces fine lines and wrinkles",
+        "Improves skin elasticity",
+        "Promotes wound healing",
+        "Anti-inflammatory properties"
+      ],
+      duration: 10,
+      price: 29900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Semaglutide (Weight Loss)",
+      slug: "weight-loss-semaglutide",
+      description: "Semaglutide with Glycine or Vitamin B12 — the same active ingredient in Wegovy & Ozempic — is a self-injectable weight loss medication supporting long-term weight management.",
+      benefits: [
+        "Suppresses appetite effectively",
+        "Supports sustainable weight loss",
+        "Improves blood sugar control",
+        "Reduces cardiovascular risk factors",
+        "Physician-supervised program"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Tirzepatide (Weight Loss)",
+      slug: "weight-loss-tirzepatide",
+      description: "Tirzepatide with Glycine or Niacinamide is a dual GIP/GLP-1 receptor agonist for powerful, self-injectable weight loss and metabolic health improvement.",
+      benefits: [
+        "Dual-action weight loss mechanism",
+        "Superior appetite reduction",
+        "Improved insulin sensitivity",
+        "Supports metabolic health",
+        "Physician-supervised program"
+      ],
+      duration: 5,
+      price: 29900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "TRT Injections (Testosterone)",
+      slug: "testosterone-trt",
+      description: "Injectable testosterone therapy that directly raises testosterone levels for fast, reliable results including more energy, strength, and improved body composition.",
+      benefits: [
+        "Fast testosterone boost",
+        "Increased energy and strength",
+        "Improved body composition",
+        "Enhanced libido and drive",
+        "Supports mental clarity"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Enclomiphene (Testosterone)",
+      slug: "testosterone-enclomiphene",
+      description: "A fertility-friendly oral tablet that helps your body naturally produce more testosterone while supporting fertility, mood, and natural energy levels.",
+      benefits: [
+        "Stimulates natural testosterone production",
+        "Fertility-friendly formula",
+        "Improved mood and drive",
+        "Natural energy support",
+        "No injections required"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Vitamin B-12 Injections",
+      slug: "vitamin-b12",
+      description: "Self-administered B12 injections to boost energy, cognitive function, memory, and mood. Essential for those with B12 deficiency or low energy levels.",
+      benefits: [
+        "Boosts energy levels",
+        "Enhances mental clarity",
+        "Supports healthy metabolism",
+        "Improves mood and cognition",
+        "Strengthens immune function"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Lipostat+ Injections",
+      slug: "vitamin-lipostat",
+      description: "Lipostat+ fat-burning injections can help speed up your metabolism, break down fat more efficiently, and support your weight-loss goals from home.",
+      benefits: [
+        "Accelerates fat metabolism",
+        "Supports weight loss goals",
+        "Boosts energy levels",
+        "Reduces fat storage",
+        "Improves liver function"
+      ],
+      duration: 5,
+      price: 19900,
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: shippedToYou.id,
+      name: "Ketamine Therapy",
+      slug: "ketamine-therapy",
+      description: "Enhance your mental wellness with customized ketamine treatment plans for depression and anxiety in the comfort of your home, in partnership with Wondermed.",
+      benefits: [
+        "Treats depression and anxiety",
+        "Promotes neuroplasticity",
+        "Rapid symptom relief",
+        "Deep meditative state",
+        "Physician-supervised program"
+      ],
+      duration: 60,
+      price: 39900,
+      imageUrl: null,
+    });
+
     // NAD+ Treatments
     await this.createTreatment({
       categoryId: nadTherapy.id,

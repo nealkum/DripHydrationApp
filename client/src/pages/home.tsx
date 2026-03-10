@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { 
   Droplet, Zap, MapPin, Clock, Shield, Star, 
   Search, Heart, Battery, Brain, Dumbbell, Sparkles,
-  Stethoscope, CheckCircle2, Users, Award
+  Stethoscope, CheckCircle2, Users, Award, Package
 } from "lucide-react";
 
 const symptomFilters = [
@@ -181,7 +181,7 @@ export default function Home() {
               Explore our range of in-home vitamin IV treatments designed for optimal health.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
                 id: "vitamin-wellness",
@@ -198,6 +198,14 @@ export default function Home() {
                 icon: Zap,
                 slug: "nad-therapy",
                 count: "2 treatments",
+              },
+              {
+                id: "shipped-to-you",
+                name: "Shipped To You",
+                description: "At-home treatments shipped to your door — peptides, weight loss, testosterone, and more.",
+                icon: Package,
+                slug: "shipped-to-you",
+                count: "13 treatments",
               },
             ].map((category) => {
               const Icon = category.icon;
