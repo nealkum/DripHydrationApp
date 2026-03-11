@@ -1,15 +1,14 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   Droplet, Zap, MapPin, Clock, Shield, Star,
   Search, Heart, Battery, Brain, Dumbbell, Sparkles,
-  Stethoscope, CheckCircle2, Users, Award, Package
+  Stethoscope, CheckCircle2, Users, Award, Package, ArrowRight
 } from "lucide-react";
 import heroPhoto from "@assets/photoshoot/drip-shoot-8241.jpeg";
-import photo2 from "@assets/photoshoot/drip-shoot-9277.jpeg";
-import photo3 from "@assets/photoshoot/drip-shoot-1036.jpeg";
 
 const symptomFilters = [
   { label: "Hangover", icon: Droplet, slug: "hangover-iv" },
@@ -67,6 +66,33 @@ const faqItems = [
   {
     question: "Where do you provide service?",
     answer: "We operate in 100+ cities across the United States and internationally. Our nurses come to your home, hotel, office, or event venue — wherever is most convenient for you.",
+  },
+];
+
+const membershipPlans = [
+  {
+    name: "Essential",
+    sessions: 1,
+    price: 149,
+    singlePrice: 249,
+    savings: 100,
+    featured: false,
+  },
+  {
+    name: "Performance",
+    sessions: 2,
+    price: 259,
+    singlePrice: 498,
+    savings: 239,
+    featured: true,
+  },
+  {
+    name: "VIP Unlimited",
+    sessions: 4,
+    price: 449,
+    singlePrice: 996,
+    savings: 547,
+    featured: false,
   },
 ];
 
@@ -260,62 +286,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Photo Feature — The Experience */}
-      <section className="py-12 md:py-20" data-testid="section-experience">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="space-y-5">
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                Luxury wellness, <span className="text-primary italic">at home</span>
-              </h2>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                Drip Hydration brings the spa experience directly to you. Relax in the comfort of your own home while a licensed registered nurse administers your treatment.
-              </p>
-              <ul className="space-y-3">
-                {[
-                  "Licensed RNs with ER/ICU experience",
-                  "All supplies included — no setup required",
-                  "Vitals monitored throughout your session",
-                  "Treatments tailored to your needs",
-                ].map((point) => (
-                  <li key={point} className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                size="lg"
-                variant="outline"
-                className="font-semibold uppercase mt-2"
-                asChild
-                data-testid="button-learn-more"
-              >
-                <Link href="/treatments">View All Treatments</Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg overflow-hidden aspect-[3/4]">
-                <img
-                  src={photo2}
-                  alt="Client relaxing during IV therapy session"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="rounded-lg overflow-hidden aspect-[3/4] mt-8">
-                <img
-                  src={photo3}
-                  alt="Premium in-home IV therapy experience"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* How It Works */}
-      <section className="py-12 md:py-16 bg-accent/20" data-testid="section-how-it-works">
+      <section className="py-12 md:py-16" data-testid="section-how-it-works">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-10">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
@@ -365,7 +337,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-12 md:py-16" data-testid="section-testimonials">
+      <section className="py-12 md:py-16 bg-accent/20" data-testid="section-testimonials">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-10">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
@@ -409,35 +381,127 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Membership CTA */}
-      <section className="py-12 md:py-16 bg-accent/20" data-testid="section-membership-cta">
+      {/* Membership CTA — High-conversion two-column layout */}
+      <section className="py-14 md:py-20" data-testid="section-membership-cta">
         <div className="container mx-auto px-4 max-w-7xl">
-          <Card className="border-primary/30 bg-primary/10">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-3">
-                Save with a <span className="text-primary italic">Membership</span>
-              </h2>
-              <p className="text-muted-foreground mb-2 max-w-2xl mx-auto">
-                Members save up to 40% per treatment plus exclusive perks like priority booking and member-only promotions.
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                Plans starting at <span className="font-semibold text-foreground">$149/month</span> &middot; HSA/FSA Eligible
-              </p>
-              <Button
-                size="lg"
-                className="font-semibold uppercase"
-                asChild
-                data-testid="button-view-membership"
-              >
-                <Link href="/membership">View Membership Plans</Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 border border-primary/20 overflow-hidden">
+            <div className="grid lg:grid-cols-2 gap-0">
+
+              {/* Left column — value proposition */}
+              <div className="p-8 md:p-12 flex flex-col justify-center space-y-6 border-b lg:border-b-0 lg:border-r border-primary/20">
+                <div className="inline-flex items-center gap-2 w-fit rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                  <Star className="w-3 h-3 fill-current" />
+                  Membership — Save up to 40%
+                </div>
+
+                <div>
+                  <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight mb-3">
+                    Stop paying full price for{" "}
+                    <span className="text-primary italic">every session</span>
+                  </h2>
+                  <p className="text-muted-foreground text-lg leading-relaxed">
+                    Get premium IV therapy delivered monthly at member-only rates — with perks that single bookings can't offer.
+                  </p>
+                </div>
+
+                <ul className="space-y-3">
+                  {[
+                    "Free mobile delivery to your location — always",
+                    "Priority same-day scheduling, no wait",
+                    "10–20% off all vitamin add-on boosters",
+                    "Complimentary vitamin shots included",
+                    "HSA / FSA eligible &middot; Cancel anytime",
+                  ].map((perk, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-primary" />
+                      <span dangerouslySetInnerHTML={{ __html: perk }} />
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button
+                    size="lg"
+                    className="font-semibold uppercase"
+                    asChild
+                    data-testid="button-view-membership"
+                  >
+                    <Link href="/membership">
+                      View All Plans
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="font-semibold uppercase"
+                    asChild
+                    data-testid="button-compare-plans"
+                  >
+                    <Link href="/membership#plans">Compare Plans</Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right column — plan price cards */}
+              <div className="p-8 md:p-12 flex flex-col justify-center space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+                  Membership plans
+                </p>
+                {membershipPlans.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className={`relative rounded-xl border p-5 flex items-center justify-between gap-4 transition-all ${
+                      plan.featured
+                        ? "border-primary bg-primary/15 shadow-md"
+                        : "border-border bg-card/50"
+                    }`}
+                    data-testid={`membership-plan-${plan.name.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {plan.featured && (
+                      <div className="absolute -top-3 left-4">
+                        <Badge className="text-[10px] font-semibold uppercase px-2.5 py-0.5 no-default-hover-elevate no-default-active-elevate">
+                          Most Popular
+                        </Badge>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className={`font-semibold text-base ${plan.featured ? 'text-foreground' : 'text-foreground'}`}>
+                        {plan.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {plan.sessions} IV session{plan.sessions > 1 ? 's' : ''} / month
+                      </p>
+                    </div>
+
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xs text-muted-foreground line-through">
+                        ${plan.singlePrice}/mo single
+                      </div>
+                      <div className="text-xl font-bold text-foreground">
+                        ${plan.price}
+                        <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                      </div>
+                      <div className="inline-flex items-center gap-1 mt-0.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+                        Save ${plan.savings}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <p className="text-xs text-muted-foreground text-center pt-1">
+                  3-month minimum &middot; HSA/FSA accepted &middot; No setup fee
+                </p>
+              </div>
+
+            </div>
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-12 md:py-16" data-testid="section-faq">
+      <section className="py-12 md:py-16 bg-accent/20" data-testid="section-faq">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-10">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-3">
