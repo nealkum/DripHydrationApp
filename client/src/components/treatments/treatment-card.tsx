@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Star } from "lucide-react";
 import type { Treatment } from "@shared/schema";
-import { ingredientMap, bestForMap, reviewMap, memberPriceMap } from "@/lib/treatment-data";
+import { ingredientMap, bestForMap, reviewMap, memberPriceMap, shippedToYouSlugs } from "@/lib/treatment-data";
 
 interface TreatmentCardProps {
   treatment: Treatment & { categorySlug?: string };
@@ -16,6 +16,7 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
   const bestFor = bestForMap[treatment.slug];
   const reviews = reviewMap[treatment.slug];
   const memberPrice = memberPriceMap[treatment.slug];
+  const isShipped = shippedToYouSlugs.has(treatment.slug);
   const memberFormatted = memberPrice ? (memberPrice / 100).toFixed(0) : null;
   const savings = memberPrice ? treatment.price - memberPrice : 0;
   const savingsFormatted = (savings / 100).toFixed(0);
@@ -118,7 +119,7 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
             asChild
             data-testid={`button-book-${treatment.id}`}
           >
-            <Link href={`/book/${treatment.slug}/location`}>Book Now</Link>
+            <Link href={`/book/${treatment.slug}/location`}>{isShipped ? "Order Now" : "Book Now"}</Link>
           </Button>
           <Button 
             variant="outline" 
