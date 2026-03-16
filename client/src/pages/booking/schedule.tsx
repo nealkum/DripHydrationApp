@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Treatment } from "@shared/schema";
 import { ArrowLeft, Clock } from "lucide-react";
 import { Link } from "wouter";
-import { cn } from "@/lib/utils";
+import { shippedToYouSlugs } from "@/lib/treatment-data";
 
 const TIME_SLOTS = [
   "8:00 AM", "10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM", "6:00 PM", "8:00 PM"
@@ -20,7 +20,7 @@ export default function BookingSchedule() {
   const [, params] = useRoute("/book/:treatmentSlug/schedule");
   const [, setLocation] = useLocation();
   const treatmentSlug = params?.treatmentSlug;
-  
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
 
@@ -29,14 +29,19 @@ export default function BookingSchedule() {
   });
 
   const treatment = treatments?.find((t) => t.slug === treatmentSlug);
+  const isShipped = treatmentSlug ? shippedToYouSlugs.has(treatmentSlug) : false;
 
-  // Check if location data exists
+  // Check if location data exists; also skip schedule step for shipped products
   useEffect(() => {
     const locationData = sessionStorage.getItem("bookingLocation");
     if (!locationData) {
       setLocation(`/book/${treatmentSlug}/location`);
+      return;
     }
-  }, [treatmentSlug, setLocation]);
+    if (isShipped) {
+      setLocation(`/book/${treatmentSlug}/payment`);
+    }
+  }, [treatmentSlug, setLocation, isShipped]);
 
   const handleContinue = () => {
     if (selectedDate && selectedTime) {
@@ -57,7 +62,7 @@ export default function BookingSchedule() {
 
   const isSameDay = selectedDate?.toDateString() === new Date().toDateString();
 
-  if (isLoading) {
+  if (isLoading || isShipped) {
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4 max-w-3xl">
@@ -84,9 +89,9 @@ export default function BookingSchedule() {
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-3xl">
-        <Button 
-          variant="ghost" 
-          className="mb-6" 
+        <Button
+          variant="ghost"
+          className="mb-6"
           asChild
           data-testid="button-back"
         >

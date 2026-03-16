@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRoute, Link } from "wouter";
+import { useRoute, Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Check, Clock, DollarSign, Search, Stethoscope, CheckCircle2, Shield, Star, FlaskConical } from "lucide-react";
+import { ArrowLeft, Check, Clock, DollarSign, Search, Stethoscope, CheckCircle2, Shield, Star, FlaskConical, Package, Truck, RefreshCw } from "lucide-react";
 import type { Treatment } from "@shared/schema";
-import { ingredientMap, bestForMap, reviewMap, memberPriceMap, treatmentReviews, addOns } from "@/lib/treatment-data";
+import { ingredientMap, bestForMap, reviewMap, memberPriceMap, treatmentReviews, addOns, shippedToYouSlugs, subscriptionPlans, type SubscriptionPlanId } from "@/lib/treatment-data";
 
 const treatmentFaqs = [
   {
@@ -29,10 +29,31 @@ const treatmentFaqs = [
   },
 ];
 
+const shippedFaqs = [
+  {
+    question: "How long does shipping take?",
+    answer: "Orders are processed within 1-2 business days and shipped via 2-day priority delivery. You will receive tracking information by email once your order ships.",
+  },
+  {
+    question: "Do I need a prescription?",
+    answer: "A brief medical intake is required before your first order. Our licensed providers will review your information and approve your prescription electronically — no in-person visit needed.",
+  },
+  {
+    question: "How do I administer the treatment?",
+    answer: "Detailed instructions are included with every shipment. Most injectable treatments come with pre-filled syringes and step-by-step guides. Our support team is available 7 days a week if you have questions.",
+  },
+  {
+    question: "Can I cancel my subscription?",
+    answer: "Yes. Monthly subscriptions can be cancelled anytime before your next billing cycle with no cancellation fees. 3-month plans are billed upfront and are non-refundable after shipment.",
+  },
+];
+
 export default function TreatmentDetail() {
   const [, params] = useRoute("/treatment/:slug");
+  const [, navigate] = useLocation();
   const treatmentSlug = params?.slug;
   const [selectedAddOns, setSelectedAddOns] = useState<Set<string>>(new Set());
+  const [selectedPlanId, setSelectedPlanId] = useState<SubscriptionPlanId>("one-month");
 
   const { data: treatments, isLoading } = useQuery<Treatment[]>({
     queryKey: ["/api/treatments"],
@@ -70,6 +91,9 @@ export default function TreatmentDetail() {
     );
   }
 
+  const isShipped = shippedToYouSlugs.has(treatment.slug);
+  const selectedPlan = subscriptionPlans.find(p => p.id === selectedPlanId)!;
+
   const formattedPrice = (treatment.price / 100).toFixed(0);
   const ingredients = ingredientMap[treatment.slug] || [];
   const bestFor = bestForMap[treatment.slug];
@@ -80,15 +104,18 @@ export default function TreatmentDetail() {
   const savingsFormatted = (savings / 100).toFixed(0);
   const savingsPercent = memberPrice ? Math.round((savings / treatment.price) * 100) : 0;
   const specificReviews = treatmentReviews[treatment.slug] || [];
-  const formattedDuration = treatment.duration >= 60 
+  const formattedDuration = treatment.duration >= 60
     ? `${Math.floor(treatment.duration / 60)}-${Math.floor(treatment.duration / 60) + 1} hours`
     : `${treatment.duration} minutes`;
 
+  // Pricing for current mode
   const addOnTotal = Array.from(selectedAddOns).reduce((sum, id) => {
     const addon = addOns.find(a => a.id === id);
     return sum + (addon?.price || 0);
   }, 0);
-  const totalPrice = treatment.price + addOnTotal;
+
+  const planPrice = Math.round(treatment.price * selectedPlan.discountMultiplier);
+  const totalPrice = isShipped ? planPrice : treatment.price + addOnTotal;
   const totalFormatted = (totalPrice / 100).toFixed(0);
 
   const toggleAddOn = (id: string) => {
@@ -100,12 +127,25 @@ export default function TreatmentDetail() {
     });
   };
 
+  const handleBookNow = () => {
+    if (isShipped) {
+      sessionStorage.setItem("shippingPlan", JSON.stringify({
+        planId: selectedPlan.id,
+        planLabel: selectedPlan.label,
+        billingNote: selectedPlan.billingNote,
+        pricePerMonth: planPrice,
+        savingsPercent: selectedPlan.savingsPercent,
+      }));
+    }
+    navigate(`/book/${treatment.slug}/location`);
+  };
+
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          className="mb-8" 
+        <Button
+          variant="ghost"
+          className="mb-8"
           asChild
           data-testid="button-back"
         >
@@ -119,10 +159,17 @@ export default function TreatmentDetail() {
           {/* Header */}
           <div>
             <div className="flex items-center gap-2 mb-3 flex-wrap">
-              <Badge variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
-                <Shield className="w-3 h-3 mr-1" />
-                Licensed RN Administered
-              </Badge>
+              {isShipped ? (
+                <Badge variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
+                  <Package className="w-3 h-3 mr-1" />
+                  Shipped To You
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-xs font-normal no-default-hover-elevate no-default-active-elevate">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Licensed RN Administered
+                </Badge>
+              )}
               <Badge variant="outline" className="text-xs font-medium border-primary/30 text-primary no-default-hover-elevate no-default-active-elevate" data-testid="badge-hsa-fsa">
                 HSA/FSA Eligible
               </Badge>
@@ -139,8 +186,9 @@ export default function TreatmentDetail() {
               <div className="flex items-center gap-2" data-testid="text-price">
                 <DollarSign className="w-5 h-5" />
                 <span className="text-2xl font-bold text-foreground">${formattedPrice}</span>
+                {isShipped && <span className="text-sm text-muted-foreground">/ month</span>}
               </div>
-              {memberFormatted && (
+              {memberFormatted && !isShipped && (
                 <div className="flex items-center gap-2" data-testid="text-member-price">
                   <span className="text-xl font-bold text-primary">${memberFormatted}</span>
                   <Badge variant="outline" className="text-[10px] font-semibold border-emerald-500/30 bg-emerald-500/10 text-emerald-400 no-default-hover-elevate no-default-active-elevate">
@@ -148,10 +196,12 @@ export default function TreatmentDetail() {
                   </Badge>
                 </div>
               )}
-              <div className="flex items-center gap-2" data-testid="text-duration">
-                <Clock className="w-5 h-5" />
-                <span className="text-lg">{formattedDuration}</span>
-              </div>
+              {!isShipped && (
+                <div className="flex items-center gap-2" data-testid="text-duration">
+                  <Clock className="w-5 h-5" />
+                  <span className="text-lg">{formattedDuration}</span>
+                </div>
+              )}
               {reviews && (
                 <div className="flex items-center gap-1.5" data-testid="text-rating">
                   <div className="flex">
@@ -181,12 +231,24 @@ export default function TreatmentDetail() {
                   <FlaskConical className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground text-sm mb-1">Why IV Therapy?</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    IV therapy delivers 100% bioavailability — compared to just 20-50% with oral supplements. 
-                    Physician-formulated and clinically dosed by Dr. Jon Snipes, MD, our treatments are designed 
-                    for maximum absorption and rapid results.
-                  </p>
+                  {isShipped ? (
+                    <>
+                      <p className="font-semibold text-foreground text-sm mb-1">Physician-Formulated &amp; Clinically Dosed</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Every product is formulated by Dr. Jon Snipes, MD, and compounded at a licensed US pharmacy. 
+                        Shipped cold-chain when required and verified for purity, potency, and sterility before dispatch.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-foreground text-sm mb-1">Why IV Therapy?</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        IV therapy delivers 100% bioavailability — compared to just 20-50% with oral supplements.
+                        Physician-formulated and clinically dosed by Dr. Jon Snipes, MD, our treatments are designed
+                        for maximum absorption and rapid results.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -221,69 +283,159 @@ export default function TreatmentDetail() {
             </ul>
           </div>
 
-          {/* Add-Ons */}
-          <div data-testid="section-addons">
-            <h2 className="text-xl font-semibold mb-1">Enhance Your Treatment</h2>
-            <p className="text-sm text-muted-foreground mb-4">Add a vitamin boost to take your treatment further.</p>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {addOns.map((addon) => {
-                const isSelected = selectedAddOns.has(addon.id);
-                return (
-                  <button
-                    key={addon.id}
-                    onClick={() => toggleAddOn(addon.id)}
-                    className={`flex items-center gap-3 p-3 rounded-md border text-left transition-colors ${
-                      isSelected 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-border'
-                    }`}
-                    data-testid={`addon-${addon.id}`}
-                  >
-                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
-                      isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
-                    }`}>
-                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{addon.name}</p>
-                      <p className="text-xs text-muted-foreground">{addon.description}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-primary whitespace-nowrap">
-                      +${(addon.price / 100).toFixed(0)}
-                    </span>
-                  </button>
-                );
-              })}
+          {/* Subscription Plan Selector — Shipped To You only */}
+          {isShipped && (
+            <div data-testid="section-subscription-plans">
+              <h2 className="text-xl font-semibold mb-1">Choose Your Plan</h2>
+              <p className="text-sm text-muted-foreground mb-4">Longer commitments unlock better pricing.</p>
+              <div className="space-y-3">
+                {subscriptionPlans.map((plan) => {
+                  const planPriceForOption = Math.round(treatment.price * plan.discountMultiplier);
+                  const isSelected = selectedPlanId === plan.id;
+                  return (
+                    <button
+                      key={plan.id}
+                      onClick={() => setSelectedPlanId(plan.id)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-lg border text-left transition-colors ${
+                        isSelected
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                      data-testid={`plan-${plan.id}`}
+                    >
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
+                      }`}>
+                        {isSelected && <div className="w-2 h-2 rounded-full bg-primary-foreground" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-foreground text-sm">{plan.label}</p>
+                          {plan.badge && (
+                            <Badge variant="outline" className={`text-[10px] font-semibold no-default-hover-elevate no-default-active-elevate ${
+                              plan.id === "monthly"
+                                ? "border-primary/30 bg-primary/10 text-primary"
+                                : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                            }`}>
+                              {plan.badge}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{plan.billingNote}</p>
+                        <p className="text-xs text-muted-foreground">{plan.description}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {plan.savingsPercent > 0 && (
+                          <p className="text-xs text-muted-foreground line-through">
+                            ${(treatment.price / 100).toFixed(0)}/mo
+                          </p>
+                        )}
+                        <p className="text-lg font-bold text-foreground">
+                          ${(planPriceForOption / 100).toFixed(0)}
+                          <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                        </p>
+                        {plan.savingsPercent > 0 && (
+                          <p className="text-xs text-emerald-400 font-semibold">Save {plan.savingsPercent}%</p>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Add-Ons — IV treatments only */}
+          {!isShipped && (
+            <div data-testid="section-addons">
+              <h2 className="text-xl font-semibold mb-1">Enhance Your Treatment</h2>
+              <p className="text-sm text-muted-foreground mb-4">Add a vitamin boost to take your treatment further.</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {addOns.map((addon) => {
+                  const isSelected = selectedAddOns.has(addon.id);
+                  return (
+                    <button
+                      key={addon.id}
+                      onClick={() => toggleAddOn(addon.id)}
+                      className={`flex items-center gap-3 p-3 rounded-md border text-left transition-colors ${
+                        isSelected
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border'
+                      }`}
+                      data-testid={`addon-${addon.id}`}
+                    >
+                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
+                        isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
+                      }`}>
+                        {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{addon.name}</p>
+                        <p className="text-xs text-muted-foreground">{addon.description}</p>
+                      </div>
+                      <span className="text-sm font-semibold text-primary whitespace-nowrap">
+                        +${(addon.price / 100).toFixed(0)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* How It Works mini */}
           <Card className="bg-accent/30">
             <CardContent className="p-6" data-testid="section-how-it-works">
               <h2 className="text-xl font-semibold mb-4">How It Works</h2>
-              <div className="grid sm:grid-cols-3 gap-4">
-                {[
-                  { icon: Search, step: "1", title: "Book", desc: "Choose your date, time & location" },
-                  { icon: Stethoscope, step: "2", title: "Relax", desc: "A licensed RN arrives at your door" },
-                  { icon: CheckCircle2, step: "3", title: "Feel Better", desc: `Treatment takes ~${formattedDuration}` },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.step} className="flex items-start gap-3">
-                      <div className="relative flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
-                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                          {item.step}
-                        </span>
+              {isShipped ? (
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {[
+                    { icon: Search, step: "1", title: "Order", desc: "Choose your plan and complete a quick medical intake" },
+                    { icon: Truck, step: "2", title: "Ships to You", desc: "Dispatched in 1-2 days with tracking via priority mail" },
+                    { icon: CheckCircle2, step: "3", title: "Self-Administer", desc: "Follow the included instructions — support team available 7 days" },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.step} className="flex items-start gap-3">
+                        <div className="relative flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-primary" />
+                          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                            {item.step}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">{item.desc}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">{item.title}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {[
+                    { icon: Search, step: "1", title: "Book", desc: "Choose your date, time & location" },
+                    { icon: Stethoscope, step: "2", title: "Relax", desc: "A licensed RN arrives at your door" },
+                    { icon: CheckCircle2, step: "3", title: "Feel Better", desc: `Treatment takes ~${formattedDuration}` },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.step} className="flex items-start gap-3">
+                        <div className="relative flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Icon className="w-5 h-5 text-primary" />
+                          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                            {item.step}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">{item.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -332,8 +484,8 @@ export default function TreatmentDetail() {
             </div>
           )}
 
-          {/* Membership upsell */}
-          {memberFormatted && (
+          {/* Membership upsell — IV treatments only */}
+          {memberFormatted && !isShipped && (
             <Card className="border-primary/20 bg-primary/5" data-testid="section-membership-upsell">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -352,27 +504,46 @@ export default function TreatmentDetail() {
             </Card>
           )}
 
-          {/* Trust bar for treatment pages */}
+          {/* Trust bar */}
           <div className="flex flex-wrap justify-center gap-6 py-4 text-xs text-muted-foreground" data-testid="section-treatment-trust">
-            <span className="flex items-center gap-1.5">
-              <Shield className="w-3.5 h-3.5 text-primary" />
-              Gentle, painless treatment at home
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Stethoscope className="w-3.5 h-3.5 text-primary" />
-              Nurse monitors vitals throughout
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-primary" />
-              30-60 minute sessions
-            </span>
+            {isShipped ? (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  Licensed US pharmacy compounded
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Truck className="w-3.5 h-3.5 text-primary" />
+                  2-day priority shipping
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5 text-primary" />
+                  Cancel anytime
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-primary" />
+                  Gentle, painless treatment at home
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Stethoscope className="w-3.5 h-3.5 text-primary" />
+                  Nurse monitors vitals throughout
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-primary" />
+                  30-60 minute sessions
+                </span>
+              </>
+            )}
           </div>
 
           {/* FAQ */}
           <div data-testid="section-faq">
             <h2 className="text-xl font-semibold mb-3">Common Questions</h2>
             <Accordion type="single" collapsible className="w-full">
-              {treatmentFaqs.map((item, idx) => (
+              {(isShipped ? shippedFaqs : treatmentFaqs).map((item, idx) => (
                 <AccordionItem key={idx} value={`faq-${idx}`} data-testid={`treatment-faq-${idx}`}>
                   <AccordionTrigger className="text-left text-sm">
                     {item.question}
@@ -388,7 +559,9 @@ export default function TreatmentDetail() {
           {/* Related Treatments */}
           {relatedTreatments && relatedTreatments.length > 0 && (
             <div data-testid="section-related">
-              <h2 className="text-xl font-semibold mb-3">Customers Also Booked</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                {isShipped ? "You May Also Like" : "Customers Also Booked"}
+              </h2>
               <div className="grid sm:grid-cols-3 gap-4">
                 {relatedTreatments.map((related) => {
                   const relMemberPrice = memberPriceMap[related.slug];
@@ -399,7 +572,7 @@ export default function TreatmentDetail() {
                           <p className="font-semibold text-foreground text-sm mb-1">{related.name}</p>
                           <div className="flex items-center gap-2">
                             <span className="text-foreground font-bold">${(related.price / 100).toFixed(0)}</span>
-                            {relMemberPrice && (
+                            {relMemberPrice && !isShipped && (
                               <span className="text-xs text-primary font-semibold">${(relMemberPrice / 100).toFixed(0)} member</span>
                             )}
                           </div>
@@ -414,16 +587,16 @@ export default function TreatmentDetail() {
 
           {/* Sticky CTA */}
           <div className="sticky bottom-20 py-4 bg-background border-t z-40">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full font-semibold uppercase"
-              asChild
+              onClick={handleBookNow}
               data-testid="button-book-now"
             >
-              <Link href={`/book/${treatment.slug}/location`}>
-                Book Now — ${totalFormatted}
-                {addOnTotal > 0 && ` (includes add-ons)`}
-              </Link>
+              {isShipped
+                ? `Order Now — $${totalFormatted}/mo · ${selectedPlan.label}`
+                : `Book Now — $${totalFormatted}${addOnTotal > 0 ? " (includes add-ons)" : ""}`
+              }
             </Button>
           </div>
         </div>

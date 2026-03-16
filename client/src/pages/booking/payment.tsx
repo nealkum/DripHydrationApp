@@ -13,11 +13,11 @@ import { StepIndicator } from "@/components/booking/step-indicator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import type { Treatment, City, InsertAppointment } from "@shared/schema";
-import { ArrowLeft, ArrowRight, CreditCard, Lock, Shield, Star, Stethoscope, Check, Droplets } from "lucide-react";
+import { ArrowLeft, ArrowRight, CreditCard, Lock, Shield, Star, Stethoscope, Check, Droplets, Package } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { memberPriceMap } from "@/lib/treatment-data";
+import { memberPriceMap, shippedToYouSlugs } from "@/lib/treatment-data";
 
 const paymentSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters"),
@@ -40,6 +40,10 @@ export default function BookingPayment() {
 
   const [locationData, setLocationData] = useState<any>(null);
   const [scheduleData, setScheduleData] = useState<any>(null);
+  const [shippingPlan, setShippingPlan] = useState<any>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  const isShipped = treatmentSlug ? shippedToYouSlugs.has(treatmentSlug) : false;
 
   const { data: treatments, isLoading: treatmentsLoading } = useQuery<Treatment[]>({
     queryKey: ["/api/treatments"],
@@ -53,16 +57,28 @@ export default function BookingPayment() {
 
   useEffect(() => {
     const location = sessionStorage.getItem("bookingLocation");
-    const schedule = sessionStorage.getItem("bookingSchedule");
-    
-    if (!location || !schedule) {
+
+    if (!location) {
       setLocation(`/book/${treatmentSlug}/location`);
       return;
     }
-    
+
     setLocationData(JSON.parse(location));
-    setScheduleData(JSON.parse(schedule));
-  }, [treatmentSlug, setLocation]);
+
+    if (isShipped) {
+      const plan = sessionStorage.getItem("shippingPlan");
+      if (plan) setShippingPlan(JSON.parse(plan));
+      setDataLoaded(true);
+    } else {
+      const schedule = sessionStorage.getItem("bookingSchedule");
+      if (!schedule) {
+        setLocation(`/book/${treatmentSlug}/schedule`);
+        return;
+      }
+      setScheduleData(JSON.parse(schedule));
+      setDataLoaded(true);
+    }
+  }, [treatmentSlug, setLocation, isShipped]);
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: InsertAppointment) => {
@@ -73,6 +89,7 @@ export default function BookingPayment() {
       sessionStorage.setItem("appointmentId", data.id);
       sessionStorage.removeItem("bookingLocation");
       sessionStorage.removeItem("bookingSchedule");
+      sessionStorage.removeItem("shippingPlan");
       sessionStorage.removeItem("treatmentSlug");
       setLocation("/booking/confirmation");
     },
@@ -98,11 +115,16 @@ export default function BookingPayment() {
   });
 
   const onSubmit = (data: PaymentForm) => {
-    if (!treatment || !locationData || !scheduleData) return;
+    if (!treatment || !locationData) return;
 
-    const finalPrice = subscribeAndSave && memberPriceMap[treatment.slug] 
-      ? memberPriceMap[treatment.slug] 
-      : treatment.price;
+    let finalPrice: number;
+    if (isShipped && shippingPlan) {
+      finalPrice = shippingPlan.pricePerMonth;
+    } else if (subscribeAndSave && memberPriceMap[treatment.slug]) {
+      finalPrice = memberPriceMap[treatment.slug];
+    } else {
+      finalPrice = treatment.price;
+    }
 
     const appointmentData: InsertAppointment = {
       treatmentId: treatment.id,
@@ -110,8 +132,8 @@ export default function BookingPayment() {
       streetAddress: locationData.streetAddress,
       aptSuite: locationData.aptSuite || null,
       specialInstructions: locationData.specialInstructions || null,
-      appointmentDate: scheduleData.date,
-      appointmentTime: scheduleData.time,
+      appointmentDate: isShipped ? new Date().toISOString().split('T')[0] : scheduleData?.date,
+      appointmentTime: isShipped ? "Ship ASAP" : scheduleData?.time,
       customerName: data.customerName,
       customerEmail: data.customerEmail,
       customerPhone: data.customerPhone,
@@ -121,13 +143,18 @@ export default function BookingPayment() {
     createAppointmentMutation.mutate(appointmentData);
   };
 
-  const steps = [
+  const stepsIV = [
     { id: "location", name: "Location", status: "complete" as const },
     { id: "schedule", name: "Schedule", status: "complete" as const },
     { id: "payment", name: "Payment", status: "current" as const },
   ];
 
-  if (treatmentsLoading || !locationData || !scheduleData) {
+  const stepsShipped = [
+    { id: "location", name: "Address", status: "complete" as const },
+    { id: "payment", name: "Payment", status: "current" as const },
+  ];
+
+  if (treatmentsLoading || !dataLoaded) {
     return (
       <div className="min-h-screen py-12">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -151,33 +178,37 @@ export default function BookingPayment() {
     );
   }
 
-  const selectedCity = cities?.find((c) => c.id === locationData.cityId);
+  const selectedCity = cities?.find((c) => c.id === locationData?.cityId);
   const memberPrice = memberPriceMap[treatment.slug];
   const regularPrice = (treatment.price / 100).toFixed(2);
   const memberPriceFormatted = memberPrice ? (memberPrice / 100).toFixed(2) : null;
   const savings = memberPrice ? ((treatment.price - memberPrice) / 100).toFixed(0) : "0";
-  const displayPrice = subscribeAndSave && memberPriceFormatted ? memberPriceFormatted : regularPrice;
+  const displayPrice = isShipped
+    ? `$${(shippingPlan?.pricePerMonth / 100 || treatment.price / 100).toFixed(2)}/mo`
+    : subscribeAndSave && memberPriceFormatted
+      ? memberPriceFormatted
+      : regularPrice;
 
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Button 
-          variant="ghost" 
-          className="mb-6" 
+        <Button
+          variant="ghost"
+          className="mb-6"
           asChild
           data-testid="button-back"
         >
-          <Link href={`/book/${treatmentSlug}/schedule`}>
+          <Link href={isShipped ? `/book/${treatmentSlug}/location` : `/book/${treatmentSlug}/schedule`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Schedule
+            {isShipped ? "Back to Address" : "Back to Schedule"}
           </Link>
         </Button>
 
-        <StepIndicator steps={steps} />
+        <StepIndicator steps={isShipped ? stepsShipped : stepsIV} />
 
         <div className="mt-8 max-w-2xl mx-auto space-y-6">
-          {/* 1. Membership Upsell Card — TOP */}
-          {memberPrice && !subscribeAndSave && !upsellDismissed && (
+          {/* Membership Upsell — IV only */}
+          {!isShipped && memberPrice && !subscribeAndSave && !upsellDismissed && (
             <Card className="border-primary/20 overflow-hidden" data-testid="card-membership-upsell">
               <div className="bg-primary/5 border-b border-primary/10 px-4 py-3 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
@@ -203,52 +234,27 @@ export default function BookingPayment() {
                     <p className="text-[10px] text-primary font-semibold">Save ${savings}/session</p>
                   </div>
                 </div>
-
-                <div className="bg-muted/50 rounded-md p-3 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">This IV session (member rate)</span>
-                    <span className="font-semibold">${memberPriceFormatted}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between pt-1">
-                    <span className="text-primary font-semibold">Your total savings today</span>
-                    <span className="text-primary font-bold">${savings}</span>
-                  </div>
-                </div>
-
                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary flex-shrink-0" /> Priority scheduling</div>
                   <div className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary flex-shrink-0" /> Free delivery always</div>
                   <div className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary flex-shrink-0" /> 10-20% off boosters</div>
                   <div className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary flex-shrink-0" /> 3-month minimum</div>
                 </div>
-
                 <div className="flex gap-2">
-                  <Button
-                    className="flex-1 font-semibold uppercase text-xs"
-                    onClick={() => setSubscribeAndSave(true)}
-                    data-testid="button-switch-membership"
-                  >
+                  <Button className="flex-1 font-semibold uppercase text-xs" onClick={() => setSubscribeAndSave(true)} data-testid="button-switch-membership">
                     Switch to Membership
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => setUpsellDismissed(true)}
-                    data-testid="button-dismiss-upsell"
-                  >
+                  <Button variant="outline" className="text-xs" onClick={() => setUpsellDismissed(true)} data-testid="button-dismiss-upsell">
                     No thanks
                   </Button>
                 </div>
-                <p className="text-center text-[10px] text-muted-foreground">
-                  3-month minimum · First session today
-                </p>
+                <p className="text-center text-[10px] text-muted-foreground">3-month minimum · First session today</p>
               </CardContent>
             </Card>
           )}
 
-          {/* Mini upsell reminder (after dismiss) */}
-          {memberPrice && !subscribeAndSave && upsellDismissed && (
+          {/* Mini upsell reminder */}
+          {!isShipped && memberPrice && !subscribeAndSave && upsellDismissed && (
             <button
               className="w-full flex items-center justify-between p-3 rounded-md border text-left hover-elevate transition-colors"
               onClick={() => setUpsellDismissed(false)}
@@ -261,12 +267,9 @@ export default function BookingPayment() {
             </button>
           )}
 
-          {/* Active membership selection */}
-          {memberPrice && subscribeAndSave && (
-            <Card 
-              className="border-primary bg-primary/5"
-              data-testid="card-subscribe-save"
-            >
+          {/* Membership applied — IV only */}
+          {!isShipped && memberPrice && subscribeAndSave && (
+            <Card className="border-primary bg-primary/5" data-testid="card-subscribe-save">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-md border-2 border-primary bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -283,13 +286,7 @@ export default function BookingPayment() {
                       Paying <span className="font-semibold text-primary">${memberPriceFormatted}</span> instead of ${regularPrice}. Free delivery included.
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs text-muted-foreground"
-                    onClick={() => setSubscribeAndSave(false)}
-                    data-testid="button-remove-membership"
-                  >
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => setSubscribeAndSave(false)} data-testid="button-remove-membership">
                     Remove
                   </Button>
                 </div>
@@ -297,36 +294,86 @@ export default function BookingPayment() {
             </Card>
           )}
 
-          {/* 2. Order Summary — COMPACT */}
+          {/* Shipping plan badge — shipped only */}
+          {isShipped && shippingPlan && (
+            <Card className="border-primary/30 bg-primary/5" data-testid="card-shipping-plan">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                    <Package className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-foreground text-sm">{shippingPlan.planLabel}</p>
+                      {shippingPlan.savingsPercent > 0 && (
+                        <Badge variant="outline" className="text-[10px] font-semibold border-emerald-500/30 bg-emerald-500/10 text-emerald-400 no-default-hover-elevate no-default-active-elevate">
+                          Save {shippingPlan.savingsPercent}%
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{shippingPlan.billingNote}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-foreground">${(shippingPlan.pricePerMonth / 100).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">/month</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Order Summary */}
           <Card>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-foreground text-base mb-3">Booking Summary</h3>
+              <h3 className="font-semibold text-foreground text-base mb-3">
+                {isShipped ? "Order Summary" : "Booking Summary"}
+              </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">Treatment</span>
+                  <span className="text-muted-foreground">
+                    {isShipped ? "Product" : "Treatment"}
+                  </span>
                   <span className="font-medium text-foreground text-right" data-testid="text-summary-treatment">{treatment.name}</span>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-muted-foreground">
+                    {isShipped ? "Ship to" : "Location"}
+                  </span>
                   <span className="font-medium text-foreground text-right" data-testid="text-summary-location">
-                    {locationData.streetAddress}{locationData.aptSuite && `, ${locationData.aptSuite}`}, {selectedCity?.name}
+                    {locationData?.streetAddress}{locationData?.aptSuite && `, ${locationData.aptSuite}`}
+                    {selectedCity && `, ${selectedCity.name}`}
                   </span>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">Date & Time</span>
-                  <span className="font-medium text-foreground text-right" data-testid="text-summary-datetime">
-                    {new Date(scheduleData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {scheduleData.time}
-                  </span>
-                </div>
+                {isShipped && shippingPlan ? (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Plan</span>
+                    <span className="font-medium text-foreground text-right" data-testid="text-summary-plan">
+                      {shippingPlan.planLabel}
+                    </span>
+                  </div>
+                ) : scheduleData ? (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Date & Time</span>
+                    <span className="font-medium text-foreground text-right" data-testid="text-summary-datetime">
+                      {new Date(scheduleData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, {scheduleData.time}
+                    </span>
+                  </div>
+                ) : null}
                 <Separator className="my-2" />
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-foreground">Total</span>
+                  <span className="font-semibold text-foreground">
+                    {isShipped ? "Monthly total" : "Total"}
+                  </span>
                   <div className="text-right">
-                    {subscribeAndSave && memberPriceFormatted ? (
+                    {!isShipped && subscribeAndSave && memberPriceFormatted ? (
                       <>
                         <span className="text-xs line-through text-muted-foreground mr-2">${regularPrice}</span>
                         <span className="text-xl font-bold text-primary" data-testid="text-summary-total">${memberPriceFormatted}</span>
                       </>
+                    ) : isShipped && shippingPlan ? (
+                      <span className="text-xl font-bold text-primary" data-testid="text-summary-total">
+                        ${(shippingPlan.pricePerMonth / 100).toFixed(2)}/mo
+                      </span>
                     ) : (
                       <span className="text-xl font-bold text-primary" data-testid="text-summary-total">${regularPrice}</span>
                     )}
@@ -336,12 +383,12 @@ export default function BookingPayment() {
             </CardContent>
           </Card>
 
-          {/* 3. Payment Form — BOTTOM */}
+          {/* Payment Form */}
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">Payment Details</CardTitle>
               <CardDescription>
-                Complete your booking information
+                {isShipped ? "Complete your order" : "Complete your booking information"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -349,7 +396,7 @@ export default function BookingPayment() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <div className="space-y-4">
                     <h3 className="font-semibold text-foreground">Contact Information</h3>
-                    
+
                     <FormField
                       control={form.control}
                       name="customerName"
@@ -357,11 +404,7 @@ export default function BookingPayment() {
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="John Doe" 
-                              {...field}
-                              data-testid="input-customer-name"
-                            />
+                            <Input placeholder="John Doe" {...field} data-testid="input-customer-name" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -375,12 +418,7 @@ export default function BookingPayment() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="email"
-                              placeholder="john@example.com" 
-                              {...field}
-                              data-testid="input-customer-email"
-                            />
+                            <Input type="email" placeholder="john@example.com" {...field} data-testid="input-customer-email" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -394,12 +432,7 @@ export default function BookingPayment() {
                         <FormItem>
                           <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <Input 
-                              type="tel"
-                              placeholder="(555) 123-4567" 
-                              {...field}
-                              data-testid="input-customer-phone"
-                            />
+                            <Input type="tel" placeholder="(555) 123-4567" {...field} data-testid="input-customer-phone" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -414,7 +447,7 @@ export default function BookingPayment() {
                       <CreditCard className="w-4 h-4" />
                       Card Information (Demo)
                     </h3>
-                    
+
                     <FormField
                       control={form.control}
                       name="cardNumber"
@@ -422,12 +455,7 @@ export default function BookingPayment() {
                         <FormItem>
                           <FormLabel>Card Number</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="1234 5678 9012 3456" 
-                              maxLength={16}
-                              {...field}
-                              data-testid="input-card-number"
-                            />
+                            <Input placeholder="1234 5678 9012 3456" maxLength={16} {...field} data-testid="input-card-number" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -442,12 +470,7 @@ export default function BookingPayment() {
                           <FormItem>
                             <FormLabel>Expiry Date</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="MM/YY" 
-                                maxLength={5}
-                                {...field}
-                                data-testid="input-expiry-date"
-                              />
+                              <Input placeholder="MM/YY" maxLength={5} {...field} data-testid="input-expiry-date" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -461,12 +484,7 @@ export default function BookingPayment() {
                           <FormItem>
                             <FormLabel>CVV</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="123" 
-                                maxLength={4}
-                                {...field}
-                                data-testid="input-cvv"
-                              />
+                              <Input placeholder="123" maxLength={4} {...field} data-testid="input-cvv" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -477,24 +495,29 @@ export default function BookingPayment() {
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Lock className="w-4 h-4" />
-                    <span>Secure checkout - Your payment information is encrypted</span>
+                    <span>Secure checkout — Your payment information is encrypted</span>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    size="lg" 
+                  <Button
+                    type="submit"
+                    size="lg"
                     className="w-full font-semibold uppercase"
                     disabled={createAppointmentMutation.isPending}
                     data-testid="button-confirm-booking"
                   >
-                    {createAppointmentMutation.isPending ? "Processing..." : `Confirm Booking — $${displayPrice}`}
+                    {createAppointmentMutation.isPending
+                      ? "Processing..."
+                      : isShipped
+                        ? `Place Order — ${displayPrice}`
+                        : `Confirm Booking — $${displayPrice}`
+                    }
                   </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
 
-          {/* Checkout trust bar */}
+          {/* Trust bar */}
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground" data-testid="section-checkout-trust">
             <span className="flex items-center gap-1">
               <Shield className="w-3.5 h-3.5 text-primary" />

@@ -149,3 +149,61 @@ export const addOns = [
   { id: "magnesium", name: "Magnesium", price: 2000, description: "Supports muscle relaxation and sleep quality" },
   { id: "vitamin-d", name: "Vitamin D", price: 2500, description: "Supports bone health and immune function" },
 ];
+
+// All "Shipped To You" treatment slugs
+export const shippedToYouSlugs = new Set([
+  "nad-injections",
+  "nad-nasal-spray",
+  "niagen-nr-injections",
+  "peptide-sermorelin",
+  "peptide-cjc-ipamorelin",
+  "peptide-ghk-cu",
+  "weight-loss-semaglutide",
+  "weight-loss-tirzepatide",
+  "testosterone-trt",
+  "testosterone-enclomiphene",
+  "vitamin-b12",
+  "vitamin-lipostat",
+  "ketamine-therapy",
+]);
+
+export type SubscriptionPlanId = "one-month" | "three-month" | "monthly";
+
+export type SubscriptionPlan = {
+  id: SubscriptionPlanId;
+  label: string;
+  billingNote: string;
+  discountMultiplier: number;
+  savingsPercent: number;
+  badge?: string;
+  description: string;
+};
+
+export const subscriptionPlans: SubscriptionPlan[] = [
+  {
+    id: "one-month",
+    label: "1-Month Supply",
+    billingNote: "One-time order",
+    discountMultiplier: 1.0,
+    savingsPercent: 0,
+    description: "Single shipment, no commitment required.",
+  },
+  {
+    id: "three-month",
+    label: "3-Month Supply",
+    billingNote: "Billed every 3 months",
+    discountMultiplier: 0.90,
+    savingsPercent: 10,
+    badge: "Save 10%",
+    description: "Recommended for best results. Ships once, covers 3 months.",
+  },
+  {
+    id: "monthly",
+    label: "Monthly Subscription",
+    billingNote: "Billed monthly · Cancel anytime",
+    discountMultiplier: 0.80,
+    savingsPercent: 20,
+    badge: "Best Value",
+    description: "Lowest per-month price. Auto-ships, cancel anytime.",
+  },
+];
