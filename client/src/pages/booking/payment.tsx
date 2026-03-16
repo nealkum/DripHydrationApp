@@ -41,6 +41,7 @@ export default function BookingPayment() {
   const [locationData, setLocationData] = useState<any>(null);
   const [scheduleData, setScheduleData] = useState<any>(null);
   const [shippingPlan, setShippingPlan] = useState<any>(null);
+  const [contactData, setContactData] = useState<any>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
 
   const isShipped = treatmentSlug ? shippedToYouSlugs.has(treatmentSlug) : false;
@@ -64,6 +65,21 @@ export default function BookingPayment() {
     }
 
     setLocationData(JSON.parse(location));
+
+    // Load pre-captured contact info from step 1
+    const contact = sessionStorage.getItem("bookingContact");
+    if (contact) {
+      const parsed = JSON.parse(contact);
+      setContactData(parsed);
+      form.reset({
+        customerName: parsed.customerName || "",
+        customerEmail: parsed.customerEmail || "",
+        customerPhone: parsed.customerPhone || "",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+      });
+    }
 
     if (isShipped) {
       const plan = sessionStorage.getItem("shippingPlan");
@@ -90,6 +106,7 @@ export default function BookingPayment() {
       sessionStorage.removeItem("bookingLocation");
       sessionStorage.removeItem("bookingSchedule");
       sessionStorage.removeItem("shippingPlan");
+      sessionStorage.removeItem("bookingContact");
       sessionStorage.removeItem("treatmentSlug");
       setLocation("/booking/confirmation");
     },

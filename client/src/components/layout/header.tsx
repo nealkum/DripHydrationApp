@@ -40,8 +40,20 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="hidden md:block flex-shrink-0">
-            <Button asChild size="lg" className="font-semibold uppercase" data-testid="button-book-treatment">
+          <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+            <Button
+              variant="outline"
+              asChild
+              className="font-semibold uppercase"
+              data-testid="button-join-now"
+            >
+              <Link href="/membership">Join Now</Link>
+            </Button>
+            <Button
+              asChild
+              className="font-semibold uppercase"
+              data-testid="button-book-treatment"
+            >
               <Link href="/treatments">Book Now</Link>
             </Button>
           </div>
@@ -71,14 +83,25 @@ export function Header() {
                 <Link href={item.href}>{item.label}</Link>
               </Button>
             ))}
-            <Button
-              className="w-full font-semibold uppercase"
-              asChild
-              onClick={() => setMobileMenuOpen(false)}
-              data-testid="mobile-button-book-treatment"
-            >
-              <Link href="/treatments">Book Now</Link>
-            </Button>
+            <div className="flex gap-2 pt-1">
+              <Button
+                variant="outline"
+                className="flex-1 font-semibold uppercase"
+                asChild
+                onClick={() => setMobileMenuOpen(false)}
+                data-testid="mobile-button-join-now"
+              >
+                <Link href="/membership">Join Now</Link>
+              </Button>
+              <Button
+                className="flex-1 font-semibold uppercase"
+                asChild
+                onClick={() => setMobileMenuOpen(false)}
+                data-testid="mobile-button-book-treatment"
+              >
+                <Link href="/treatments">Book Now</Link>
+              </Button>
+            </div>
           </div>
         )}
       </div>
