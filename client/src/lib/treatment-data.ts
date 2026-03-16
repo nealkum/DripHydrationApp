@@ -23,6 +23,10 @@ export const ingredientMap: Record<string, string[]> = {
   "vitamin-b12": ["Methylcobalamin (B12)"],
   "vitamin-lipostat": ["Methionine", "Inositol", "Choline"],
   "ketamine-therapy": ["Ketamine HCl"],
+  // Specialty IVs
+  "iron-iv": ["Iron Sucrose (Venofer)", "Saline Solution"],
+  "ketamine-iv": ["Ketamine HCl", "Saline Solution", "Midazolam (if needed)"],
+  "exosome-iv": ["Exosomes", "Growth Factors", "Saline Solution"],
 };
 
 export const bestForMap: Record<string, { label: string; color: string }> = {
@@ -50,6 +54,10 @@ export const bestForMap: Record<string, { label: string; color: string }> = {
   "vitamin-b12": { label: "Best for: Low Energy", color: "bg-amber-100 text-amber-800 border-amber-200" },
   "vitamin-lipostat": { label: "Best for: Fat Burning", color: "bg-lime-100 text-lime-800 border-lime-200" },
   "ketamine-therapy": { label: "Best for: Depression/Anxiety", color: "bg-teal-100 text-teal-800 border-teal-200" },
+  // Specialty IVs
+  "iron-iv": { label: "Best for: Iron Deficiency", color: "bg-orange-100 text-orange-800 border-orange-200" },
+  "ketamine-iv": { label: "Best for: Depression & PTSD", color: "bg-violet-100 text-violet-800 border-violet-200" },
+  "exosome-iv": { label: "Best for: Regeneration", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
 };
 
 export const reviewMap: Record<string, { rating: number; count: number }> = {
@@ -77,6 +85,10 @@ export const reviewMap: Record<string, { rating: number; count: number }> = {
   "vitamin-b12": { rating: 4.7, count: 1890 },
   "vitamin-lipostat": { rating: 4.8, count: 430 },
   "ketamine-therapy": { rating: 4.9, count: 290 },
+  // Specialty IVs
+  "iron-iv": { rating: 4.9, count: 380 },
+  "ketamine-iv": { rating: 4.9, count: 520 },
+  "exosome-iv": { rating: 5.0, count: 140 },
 };
 
 export const memberPriceMap: Record<string, number> = {
@@ -104,6 +116,10 @@ export const memberPriceMap: Record<string, number> = {
   "vitamin-b12": 14900,
   "vitamin-lipostat": 14900,
   "ketamine-therapy": 31900,
+  // Specialty IVs
+  "iron-iv": 69900,
+  "ketamine-iv": 89900,
+  "exosome-iv": 179900,
 };
 
 export const treatmentReviews: Record<string, { name: string; city: string; rating: number; text: string }[]> = {
@@ -138,6 +154,21 @@ export const treatmentReviews: Record<string, { name: string; city: string; rati
   "nad-boost": [
     { name: "Alex P.", city: "San Diego", rating: 5, text: "The NAD+ with vitamins combo is the ultimate wellness treatment. Feel incredible after every session." },
     { name: "Jennifer W.", city: "Atlanta", rating: 5, text: "I've tried NAD alone but the boost version is so much better with all the added vitamins." },
+  ],
+  "iron-iv": [
+    { name: "Diana R.", city: "Houston", rating: 5, text: "I struggled with iron supplements for years due to nausea. This IV gave me my energy back in one session." },
+    { name: "Monica S.", city: "Chicago", rating: 5, text: "Post-pregnancy anemia completely addressed. My hemoglobin levels improved dramatically after just two sessions." },
+    { name: "Karen T.", city: "Boston", rating: 5, text: "No side effects at all unlike oral iron. The nurse was gentle and professional throughout." },
+  ],
+  "ketamine-iv": [
+    { name: "James F.", city: "Denver", rating: 5, text: "After years of treatment-resistant depression, this has been the only thing that's made a real difference." },
+    { name: "Natalie B.", city: "Seattle", rating: 5, text: "I was nervous at first but the nurse made me feel completely safe. Life-changing results for my PTSD." },
+    { name: "Marcus W.", city: "Austin", rating: 5, text: "The rapid improvement in my mood was remarkable. Finally something that actually works." },
+  ],
+  "exosome-iv": [
+    { name: "Patricia L.", city: "Miami", rating: 5, text: "My chronic joint inflammation has reduced significantly. This is truly cutting-edge medicine delivered at home." },
+    { name: "Dr. Steve H.", city: "Los Angeles", rating: 5, text: "As a physician I was skeptical, but the regenerative results have been genuinely impressive." },
+    { name: "Angela M.", city: "New York", rating: 5, text: "Worth every penny for the cellular rejuvenation. My energy and skin quality improved noticeably." },
   ],
 };
 

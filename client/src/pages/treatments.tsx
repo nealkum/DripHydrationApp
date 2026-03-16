@@ -29,7 +29,7 @@ export default function Treatments() {
 
   const categoryIcons: Record<string, LucideIcon> = {
     "vitamin-wellness": Droplet,
-    "nad-therapy": Zap,
+    "specialty-ivs": Zap,
     "shipped-to-you": Package,
   };
 

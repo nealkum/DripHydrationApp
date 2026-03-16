@@ -141,10 +141,10 @@ export class MemStorage implements IStorage {
       slug: "vitamin-wellness",
     });
 
-    const nadTherapy = await this.createCategory({
-      name: "NAD+ Therapy",
-      description: "Advanced anti-aging and cellular health treatments",
-      slug: "nad-therapy",
+    const specialtyIVs = await this.createCategory({
+      name: "Specialty IVs",
+      description: "Next-level IV treatments for specialized medical and regenerative needs",
+      slug: "specialty-ivs",
     });
 
     // Vitamin & Wellness Treatments
@@ -513,9 +513,9 @@ export class MemStorage implements IStorage {
       imageUrl: null,
     });
 
-    // NAD+ Treatments
+    // NAD+ Treatments — now part of Vitamin & Wellness
     await this.createTreatment({
-      categoryId: nadTherapy.id,
+      categoryId: vitaminWellness.id,
       name: "NAD+ IV Therapy",
       slug: "nad-iv-therapy",
       description: "Advanced anti-aging therapy that supports brain function, increases energy, and aids in addiction recovery. NAD+ is essential for cellular health and longevity.",
@@ -532,7 +532,7 @@ export class MemStorage implements IStorage {
     });
 
     await this.createTreatment({
-      categoryId: nadTherapy.id,
+      categoryId: vitaminWellness.id,
       name: "NAD+ Boost",
       slug: "nad-boost",
       description: "High-dose NAD+ combined with vitamin boost for maximum energy and anti-aging benefits. Perfect for those seeking peak performance.",
@@ -545,6 +545,58 @@ export class MemStorage implements IStorage {
       ],
       duration: 150,
       price: 79900, // $799
+      imageUrl: null,
+    });
+
+    // Specialty IV Treatments
+    await this.createTreatment({
+      categoryId: specialtyIVs.id,
+      name: "Iron IV Therapy",
+      slug: "iron-iv",
+      description: "Combat iron deficiency in the comfort of your home with a Venofer (iron sucrose) IV infusion administered by a licensed nurse. Ideal for those with anemia or iron deficiency who cannot tolerate oral iron supplements.",
+      benefits: [
+        "Rapidly restores iron levels",
+        "Relieves fatigue and weakness from anemia",
+        "No GI side effects vs. oral iron",
+        "100% bioavailability",
+        "Physician-supervised infusion"
+      ],
+      duration: 60,
+      price: 79900, // $799
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: specialtyIVs.id,
+      name: "Ketamine IV Therapy",
+      slug: "ketamine-iv",
+      description: "In-home ketamine IV infusions to help individuals experiencing treatment-resistant depression, anxiety, PTSD, and chronic pain. Administered by a licensed nurse with physician oversight.",
+      benefits: [
+        "Relief for treatment-resistant depression",
+        "Reduces anxiety and PTSD symptoms",
+        "Promotes neuroplasticity and brain health",
+        "Rapid-acting — often felt within hours",
+        "Physician-supervised protocol"
+      ],
+      duration: 90,
+      price: 99900, // $999
+      imageUrl: null,
+    });
+
+    await this.createTreatment({
+      categoryId: specialtyIVs.id,
+      name: "Exosome IV Therapy",
+      slug: "exosome-iv",
+      description: "Experience the cutting edge of regenerative medicine with Exosome IV Therapy. Exosomes are nano-sized vesicles that carry growth factors and signaling molecules to support tissue regeneration, reduce inflammation, and support long-term cellular health.",
+      benefits: [
+        "Decreases systemic inflammation",
+        "Supports tissue and joint regeneration",
+        "Promotes cellular rejuvenation",
+        "Reduces chronic pain",
+        "Advanced regenerative treatment"
+      ],
+      duration: 60,
+      price: 199900, // $1999
       imageUrl: null,
     });
 

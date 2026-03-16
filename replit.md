@@ -60,7 +60,7 @@ Preferred communication style: Simple, everyday language.
 - Response formatting with consistent error handling
 
 **Database Schema**
-- Categories: Treatment groupings (Vitamin & Wellness, NAD+ Therapy, Shipped To You)
+- Categories: Treatment groupings (Vitamin & Wellness, Specialty IVs, Shipped To You)
 - Treatments: Individual services with pricing, duration, benefits, and descriptions
 - Cities: Service locations with region grouping
 - Appointments: Customer bookings with address, scheduling, and contact information
