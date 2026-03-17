@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Calendar, MapPin, Clock, User, Star, Users, Gift, ArrowRight } from "lucide-react";
 import type { Appointment, Treatment, City } from "@shared/schema";
 import { Link } from "wouter";
+import { shippedToYouSlugs } from "@/lib/treatment-data";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
@@ -61,6 +62,7 @@ export default function BookingConfirmation() {
   const treatment = treatments?.find((t) => t.id === appointment.treatmentId);
   const city = cities?.find((c) => c.id === appointment.cityId);
   const formattedPrice = (appointment.totalPrice / 100).toFixed(2);
+  const isShipped = treatment ? shippedToYouSlugs.has(treatment.slug) : false;
 
   return (
     <div className="min-h-screen py-12">
@@ -70,16 +72,18 @@ export default function BookingConfirmation() {
             <CheckCircle2 className="w-10 h-10 text-primary" data-testid="icon-success" />
           </div>
           <h1 className="font-serif text-4xl font-bold text-foreground mb-2">
-            Booking Confirmed!
+            {isShipped ? "Order Confirmed!" : "Booking Confirmed!"}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Your appointment has been successfully scheduled
+            {isShipped
+              ? "Your order has been placed and is being prepared for shipment"
+              : "Your appointment has been successfully scheduled"}
           </p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">Appointment Details</CardTitle>
+            <CardTitle className="text-xl">{isShipped ? "Order Details" : "Appointment Details"}</CardTitle>
             <CardDescription>
               A confirmation email has been sent to {appointment.customerEmail}
             </CardDescription>
@@ -99,38 +103,43 @@ export default function BookingConfirmation() {
 
             <Separator />
 
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground mb-1">Date & Time</h3>
-                <p className="text-muted-foreground" data-testid="text-appointment-datetime">
-                  {new Date(appointment.appointmentDate).toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                  <br />
-                  {appointment.appointmentTime}
-                </p>
-              </div>
-            </div>
-
-            <Separator />
+            {!isShipped && (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1">Date & Time</h3>
+                    <p className="text-muted-foreground" data-testid="text-appointment-datetime">
+                      {new Date(appointment.appointmentDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                      <br />
+                      {appointment.appointmentTime}
+                    </p>
+                  </div>
+                </div>
+                <Separator />
+              </>
+            )}
 
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <MapPin className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground mb-1">Service Location</h3>
+                <h3 className="font-semibold text-foreground mb-1">
+                  {isShipped ? "Shipping Address" : "Service Location"}
+                </h3>
                 <p className="text-muted-foreground" data-testid="text-appointment-location">
                   {appointment.streetAddress}
                   {appointment.aptSuite && `, ${appointment.aptSuite}`}
                   <br />
-                  {city?.name}, {city?.state}
+                  {city ? `${city.name}, ${city.state}` : appointment.cityId}
                 </p>
               </div>
             </div>
@@ -142,9 +151,13 @@ export default function BookingConfirmation() {
                 <Clock className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground mb-1">Estimated Arrival</h3>
+                <h3 className="font-semibold text-foreground mb-1">
+                  {isShipped ? "Estimated Delivery" : "Estimated Arrival"}
+                </h3>
                 <p className="text-muted-foreground">
-                  Our licensed nurse will arrive within the scheduled 2-hour window
+                  {isShipped
+                    ? "Orders typically ship within 2–5 business days. You'll receive a tracking number via email."
+                    : "Our licensed nurse will arrive within the scheduled 2-hour window"}
                 </p>
               </div>
             </div>
@@ -163,24 +176,45 @@ export default function BookingConfirmation() {
         <Card className="bg-accent/30 mb-6">
           <CardContent className="pt-6">
             <h3 className="font-semibold text-foreground mb-3">What's Next?</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>You'll receive a confirmation email with all appointment details</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>Our nurse will contact you 30 minutes before arrival</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>Treatment typically takes {treatment?.duration} minutes to complete</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>Relax and enjoy your premium wellness experience</span>
-              </li>
-            </ul>
+            {isShipped ? (
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>You'll receive a confirmation email with your order details</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Your order will be processed and shipped within 1–2 business days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>You'll receive a tracking number via email once your order ships</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Delivery typically takes 2–5 business days</span>
+                </li>
+              </ul>
+            ) : (
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>You'll receive a confirmation email with all appointment details</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Our nurse will contact you 30 minutes before arrival</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Treatment typically takes {treatment?.duration} minutes to complete</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Relax and enjoy your premium wellness experience</span>
+                </li>
+              </ul>
+            )}
           </CardContent>
         </Card>
 
@@ -243,7 +277,7 @@ export default function BookingConfirmation() {
             asChild
             data-testid="button-book-another"
           >
-            <Link href="/treatments">Book Another Treatment</Link>
+            <Link href="/treatments">{isShipped ? "Shop More Products" : "Book Another Treatment"}</Link>
           </Button>
           <Button 
             size="lg" 

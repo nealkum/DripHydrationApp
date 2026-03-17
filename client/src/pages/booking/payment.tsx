@@ -145,7 +145,7 @@ export default function BookingPayment() {
 
     const appointmentData: InsertAppointment = {
       treatmentId: treatment.id,
-      cityId: locationData.cityId,
+      cityId: selectedCity?.id || locationData.cityName || "",
       streetAddress: locationData.streetAddress,
       aptSuite: locationData.aptSuite || null,
       specialInstructions: locationData.specialInstructions || null,
