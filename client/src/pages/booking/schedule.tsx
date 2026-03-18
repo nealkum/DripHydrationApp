@@ -13,7 +13,18 @@ import { Link } from "wouter";
 import { shippedToYouSlugs } from "@/lib/treatment-data";
 
 const TIME_SLOTS = [
-  "8:00 AM", "10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM", "6:00 PM", "8:00 PM"
+  "8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM",
+  "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM",
+  "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM",
+];
+
+const TIME_WINDOWS = [
+  { label: "Early Morning",  value: "Early Morning (7–9 AM)",   detail: "7:00 AM – 9:00 AM"   },
+  { label: "Morning",        value: "Morning (9 AM–12 PM)",     detail: "9:00 AM – 12:00 PM"  },
+  { label: "Midday",         value: "Midday (12–3 PM)",         detail: "12:00 PM – 3:00 PM"  },
+  { label: "Afternoon",      value: "Afternoon (3–6 PM)",       detail: "3:00 PM – 6:00 PM"   },
+  { label: "Evening",        value: "Evening (6–9 PM)",         detail: "6:00 PM – 9:00 PM"   },
+  { label: "Anytime",        value: "Anytime",                  detail: "Flexible — any time" },
 ];
 
 export default function BookingSchedule() {
@@ -23,6 +34,7 @@ export default function BookingSchedule() {
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [timeMode, setTimeMode] = useState<"exact" | "window">("exact");
 
   const { data: treatments, isLoading } = useQuery<Treatment[]>({
     queryKey: ["/api/treatments"],
@@ -138,20 +150,75 @@ export default function BookingSchedule() {
               {/* Time Selection */}
               {selectedDate && (
                 <div>
-                  <h3 className="font-semibold text-foreground mb-4">Choose Time</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {TIME_SLOTS.map((time) => (
-                      <Button
-                        key={time}
-                        variant={selectedTime === time ? "default" : "outline"}
-                        onClick={() => setSelectedTime(time)}
-                        className="h-12"
-                        data-testid={`button-time-${time.replace(/\s/g, '-').toLowerCase()}`}
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <h3 className="font-semibold text-foreground">Choose Time</h3>
+                    {/* Mode toggle */}
+                    <div className="flex rounded-md border border-border overflow-hidden text-sm">
+                      <button
+                        type="button"
+                        onClick={() => { setTimeMode("exact"); setSelectedTime(""); }}
+                        className={`px-4 py-1.5 font-medium transition-colors ${
+                          timeMode === "exact"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background text-muted-foreground hover:bg-accent"
+                        }`}
+                        data-testid="button-mode-exact"
                       >
-                        {time}
-                      </Button>
-                    ))}
+                        Exact Time
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setTimeMode("window"); setSelectedTime(""); }}
+                        className={`px-4 py-1.5 font-medium transition-colors border-l border-border ${
+                          timeMode === "window"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background text-muted-foreground hover:bg-accent"
+                        }`}
+                        data-testid="button-mode-window"
+                      >
+                        Time Window
+                      </button>
+                    </div>
                   </div>
+
+                  {timeMode === "exact" ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {TIME_SLOTS.map((time) => (
+                        <Button
+                          key={time}
+                          variant={selectedTime === time ? "default" : "outline"}
+                          onClick={() => setSelectedTime(time)}
+                          data-testid={`button-time-${time.replace(/[\s:]/g, '-').toLowerCase()}`}
+                        >
+                          {time}
+                        </Button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {TIME_WINDOWS.map((w) => (
+                        <button
+                          key={w.value}
+                          type="button"
+                          onClick={() => setSelectedTime(w.value)}
+                          className={`flex items-start gap-3 p-4 rounded-md border text-left transition-colors ${
+                            selectedTime === w.value
+                              ? "border-primary bg-primary/10"
+                              : "border-border bg-card hover-elevate"
+                          }`}
+                          data-testid={`button-window-${w.label.toLowerCase().replace(/\s/g, '-')}`}
+                        >
+                          <Clock className={`w-4 h-4 mt-0.5 flex-shrink-0 ${selectedTime === w.value ? "text-primary" : "text-muted-foreground"}`} />
+                          <div>
+                            <p className={`font-semibold text-sm ${selectedTime === w.value ? "text-primary" : "text-foreground"}`}>
+                              {w.label}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{w.detail}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
