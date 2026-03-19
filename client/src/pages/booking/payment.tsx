@@ -37,7 +37,19 @@ export default function BookingPayment() {
   const treatmentSlug = params?.treatmentSlug;
   const [subscribeAndSave, setSubscribeAndSave] = useState(false);
   const [upsellDismissed, setUpsellDismissed] = useState(false);
-  const [additionalItems, setAdditionalItems] = useState<Treatment[]>([]);
+  // Rehydrate add-ons from sessionStorage so back-navigation preserves selections.
+  // Only applies to shipped flows; confirmation page clears the key after a completed order.
+  const [additionalItems, setAdditionalItems] = useState<Treatment[]>(() => {
+    if (!treatmentSlug || !shippedToYouSlugs.has(treatmentSlug)) return [];
+    try {
+      const raw = sessionStorage.getItem("additionalShippedItems");
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? (parsed as unknown as Treatment[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [addMoreOpen, setAddMoreOpen] = useState(false);
 
   const [locationData, setLocationData] = useState<any>(null);
@@ -59,11 +71,6 @@ export default function BookingPayment() {
   const treatment = treatments?.find((t) => t.slug === treatmentSlug);
 
   useEffect(() => {
-    // Always clear any stale add-on data from a previous checkout
-    sessionStorage.removeItem("additionalShippedItems");
-    // Reset add-on UI state to empty for this fresh checkout
-    setAdditionalItems([]);
-
     const location = sessionStorage.getItem("bookingLocation");
 
     if (!location) {
