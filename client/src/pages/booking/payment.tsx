@@ -245,9 +245,16 @@ export default function BookingPayment() {
       ? memberPriceFormatted
       : regularPrice;
 
-  // Shipped-only: other shipped products available to add
+  // Shipped-only: other shipped products available to add.
+  // Exclude sensitive/controlled substances from the add-on upsell list.
+  const addOnBlockList = new Set([
+    "ketamine-therapy",
+    "testosterone-trt",
+    "testosterone-enclomiphene",
+    "weight-loss-tirzepatide",
+  ]);
   const availableAddOns = (treatments ?? []).filter(
-    t => shippedToYouSlugs.has(t.slug) && t.slug !== treatmentSlug
+    t => shippedToYouSlugs.has(t.slug) && t.slug !== treatmentSlug && !addOnBlockList.has(t.slug)
   );
 
   // Live total including add-ons
