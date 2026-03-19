@@ -45,7 +45,17 @@ export default function BookingPayment() {
       const raw = sessionStorage.getItem("additionalShippedItems");
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? (parsed as unknown as Treatment[]) : [];
+      if (!Array.isArray(parsed)) return [];
+      // Type-safe narrow parse: validate required fields and exclude current primary treatment
+      return parsed.filter(
+        (i): i is Treatment =>
+          i != null &&
+          typeof i.id === "string" &&
+          typeof i.slug === "string" &&
+          typeof i.name === "string" &&
+          typeof i.price === "number" &&
+          i.slug !== treatmentSlug // exclude current primary from rehydrated add-ons
+      );
     } catch {
       return [];
     }
