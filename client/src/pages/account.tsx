@@ -195,6 +195,10 @@ export default function Account() {
     setNavLocation(`/book/${order.treatmentSlug}/location`);
   };
 
+  const handleReorder = (order: MockOrder) => {
+    setNavLocation(`/book/${order.treatmentSlug}/location`);
+  };
+
   if (!account) {
     return (
       <div className="min-h-screen py-12">
@@ -430,6 +434,18 @@ export default function Account() {
                         >
                           <RotateCcw className="w-3 h-3 mr-1.5" />
                           Rebook
+                        </Button>
+                      )}
+                      {order.isShipped && order.status === "shipped" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs font-semibold uppercase"
+                          onClick={() => handleReorder(order)}
+                          data-testid={`button-reorder-${order.id}`}
+                        >
+                          <RotateCcw className="w-3 h-3 mr-1.5" />
+                          Reorder
                         </Button>
                       )}
                     </div>
