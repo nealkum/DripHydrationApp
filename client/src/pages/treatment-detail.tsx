@@ -586,7 +586,7 @@ export default function TreatmentDetail() {
           )}
 
           {/* Sticky CTA */}
-          <div className="sticky bottom-20 py-4 bg-background border-t z-40">
+          <div className="sticky bottom-14 pt-4 pb-2 bg-background border-t z-40">
             <Button
               size="lg"
               className="w-full font-semibold uppercase"
