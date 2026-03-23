@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, Calendar, MapPin, Clock, User, Star, Users, Gift, ArrowRight, Package } from "lucide-react";
+import { CheckCircle2, Calendar, MapPin, Clock, User, Star, Users, Gift, ArrowRight, Package, RefreshCw } from "lucide-react";
 import type { Appointment, Treatment, City } from "@shared/schema";
 import { Link } from "wouter";
 import { shippedToYouSlugs } from "@/lib/treatment-data";
@@ -76,6 +76,19 @@ export default function BookingConfirmation() {
   const city = cities?.find((c) => c.id === appointment.cityId);
   const formattedPrice = (appointment.totalPrice / 100).toFixed(2);
   const isShipped = treatment ? shippedToYouSlugs.has(treatment.slug) : false;
+
+  const handleRebook = () => {
+    if (!treatment) return;
+    sessionStorage.setItem("bookingRebook", JSON.stringify({
+      customerName: appointment.customerName,
+      customerEmail: appointment.customerEmail,
+      customerPhone: appointment.customerPhone,
+      streetAddress: appointment.streetAddress,
+      aptSuite: appointment.aptSuite || "",
+      cityName: city?.name || "",
+    }));
+    setLocation(`/book/${treatment.slug}/location`);
+  };
 
   // Only use add-ons for shipped orders; guard against stale sessionStorage for IV bookings
   const safeAddOns = isShipped ? additionalShippedItems : [];
@@ -302,8 +315,20 @@ export default function BookingConfirmation() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
+          {treatment && (
+            <Button
+              size="lg"
+              className="flex-1 font-semibold uppercase"
+              onClick={handleRebook}
+              data-testid="button-rebook"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              {isShipped ? "Reorder" : "Rebook This Treatment"}
+            </Button>
+          )}
           <Button 
             size="lg" 
+            variant="outline"
             className="flex-1 font-semibold uppercase"
             asChild
             data-testid="button-book-another"

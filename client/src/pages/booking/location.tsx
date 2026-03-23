@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
@@ -13,9 +14,18 @@ import { StepIndicator } from "@/components/booking/step-indicator";
 import { SelectedTreatmentBanner } from "@/components/booking/selected-treatment-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Treatment } from "@shared/schema";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle2, Pencil } from "lucide-react";
 import { Link } from "wouter";
 import { shippedToYouSlugs } from "@/lib/treatment-data";
+
+interface RebookData {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  streetAddress: string;
+  aptSuite: string;
+  cityName: string;
+}
 
 const locationSchema = z.object({
   customerName: z.string().min(2, "Please enter your full name"),
@@ -41,7 +51,22 @@ export default function BookingLocation() {
 
   const treatment = treatments?.find((t) => t.slug === treatmentSlug);
 
-  // Pre-fill from any previously saved contact data
+  // Read rebook data (set by confirmation page "Rebook" button) once on mount
+  const [rebookData] = useState<RebookData | null>(() => {
+    try {
+      const raw = sessionStorage.getItem("bookingRebook");
+      if (raw) {
+        sessionStorage.removeItem("bookingRebook");
+        return JSON.parse(raw) as RebookData;
+      }
+    } catch { /* ignore */ }
+    return null;
+  });
+
+  // Show the "use previous details" banner when rebook data is present
+  const [showRebookBanner, setShowRebookBanner] = useState(!!rebookData);
+
+  // Pre-fill from rebook data first, then fall back to saved contact
   const saved = (() => {
     try {
       const raw = sessionStorage.getItem("bookingContact");
@@ -52,12 +77,12 @@ export default function BookingLocation() {
   const form = useForm<LocationForm>({
     resolver: zodResolver(locationSchema),
     defaultValues: {
-      customerName: saved.customerName || "",
-      customerEmail: saved.customerEmail || "",
-      customerPhone: saved.customerPhone || "",
-      cityName: "",
-      streetAddress: "",
-      aptSuite: "",
+      customerName: rebookData?.customerName || saved.customerName || "",
+      customerEmail: rebookData?.customerEmail || saved.customerEmail || "",
+      customerPhone: rebookData?.customerPhone || saved.customerPhone || "",
+      cityName: rebookData?.cityName || "",
+      streetAddress: rebookData?.streetAddress || "",
+      aptSuite: rebookData?.aptSuite || "",
       specialInstructions: "",
     },
   });
@@ -146,7 +171,48 @@ export default function BookingLocation() {
 
         <SelectedTreatmentBanner treatment={treatment} />
 
-        <div className="mt-6">
+        {/* Rebook banner — shown when returning from confirmation with saved details */}
+        {showRebookBanner && rebookData && (
+          <Card className="mt-6 border-primary/30 bg-primary/5" data-testid="rebook-banner">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground text-sm mb-0.5">Use your previous details?</p>
+                  <p className="text-sm text-muted-foreground">{rebookData.customerName} &middot; {rebookData.customerEmail}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {rebookData.streetAddress}{rebookData.aptSuite ? `, ${rebookData.aptSuite}` : ""}{rebookData.cityName ? `, ${rebookData.cityName}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  size="default"
+                  className="flex-1 font-semibold uppercase"
+                  onClick={() => form.handleSubmit(onSubmit)()}
+                  data-testid="button-rebook-confirm"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  {isShipped ? "Ship to This Address" : "Yes, Use This Address"}
+                </Button>
+                <Button
+                  size="default"
+                  variant="outline"
+                  className="font-semibold uppercase"
+                  onClick={() => setShowRebookBanner(false)}
+                  data-testid="button-rebook-change"
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Change
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className={`${showRebookBanner && rebookData ? "mt-4 hidden" : "mt-6"}`}>
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl">
