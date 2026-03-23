@@ -74,10 +74,12 @@ export function TreatmentCard({ treatment }: TreatmentCardProps) {
           >
             ${formattedPrice}
           </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="w-3 h-3" />
-            {durationText}
-          </span>
+          {!isShipped && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              {durationText}
+            </span>
+          )}
           <Badge variant="outline" className="text-[10px] font-medium border-primary/30 text-primary no-default-hover-elevate no-default-active-elevate" data-testid={`badge-hsa-${treatment.id}`}>
             HSA/FSA
           </Badge>
