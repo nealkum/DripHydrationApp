@@ -9,7 +9,7 @@ import type { Treatment } from "@shared/schema";
 import {
   Droplet, Zap, MapPin, Clock, Shield, Star, X,
   Search, Heart, Battery, Brain, Dumbbell, Sparkles,
-  Stethoscope, CheckCircle2, Users, Award, Package, ArrowRight, TrendingUp
+  Stethoscope, CheckCircle2, Users, Award, Package, ArrowRight, TrendingUp, CreditCard
 } from "lucide-react";
 import heroPhoto from "@assets/photoshoot/drip-shoot-8241.jpeg";
 import { bestForMap, reviewMap, memberPriceMap } from "@/lib/treatment-data";
@@ -225,6 +225,10 @@ export default function Home() {
             <div className="flex items-center gap-1.5" data-testid="trust-years">
               <Award className="w-4 h-4 text-primary" />
               <span>Celebrating <span className="font-semibold text-foreground">10 Years</span></span>
+            </div>
+            <div className="flex items-center gap-1.5" data-testid="trust-hsa">
+              <CreditCard className="w-4 h-4 text-primary" />
+              <span><span className="font-semibold text-foreground">HSA / FSA</span> Eligible</span>
             </div>
           </div>
         </div>
