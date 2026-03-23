@@ -166,7 +166,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg text-white/75 leading-relaxed">
-              Licensed nurses at your door in as little as 2 hours. 100+ cities worldwide.
+              In-home IV wellness in 100+ cities nationwide. HSA/FSA eligible.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
