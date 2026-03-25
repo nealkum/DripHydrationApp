@@ -6,24 +6,53 @@ import { TreatmentsScreen } from "./screens/TreatmentsScreen";
 import { OrdersScreen } from "./screens/OrdersScreen";
 import { AccountScreen } from "./screens/AccountScreen";
 import { BookingScreen } from "./screens/BookingScreen";
+import { TreatmentDetailScreen } from "./screens/TreatmentDetailScreen";
+import { MembershipScreen } from "./screens/MembershipScreen";
+import { NotificationsScreen } from "./screens/NotificationsScreen";
 
-type TabId = "home" | "tx" | "bk" | "ord" | "acc";
+export type TabId = "home" | "tx" | "bk" | "ord" | "acc";
+
+export type NavScreen =
+  | { type: "treatment-detail"; slug: string }
+  | { type: "membership" }
+  | { type: "notifications" };
+
+export interface NavProps {
+  navigate: (screen: NavScreen) => void;
+  goBack: () => void;
+  onTabChange: (tab: TabId) => void;
+  openBooking: (slug?: string) => void;
+}
 
 export function MobileApp() {
   const [tab, setTab] = useState<TabId>("home");
+  const [navStack, setNavStack] = useState<NavScreen[]>([]);
   const [booking, setBooking] = useState<{ open: boolean; slug?: string }>({ open: false });
 
-  function handleBook(slug?: string) {
+  const currentScreen = navStack[navStack.length - 1] ?? null;
+
+  function navigate(screen: NavScreen) {
+    setNavStack((prev) => [...prev, screen]);
+  }
+
+  function goBack() {
+    setNavStack((prev) => prev.slice(0, -1));
+  }
+
+  function openBooking(slug?: string) {
     setBooking({ open: true, slug });
   }
 
   function handleTabSelect(id: TabId) {
     if (id === "bk") {
-      handleBook();
+      openBooking();
       return;
     }
     setTab(id);
+    setNavStack([]);
   }
+
+  const navProps: NavProps = { navigate, goBack, onTabChange: handleTabSelect, openBooking };
 
   return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", background: "#0a1f1f", padding: "16px 0", fontFamily: SANS }}>
@@ -47,15 +76,26 @@ export function MobileApp() {
         </div>
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", paddingBottom: 84 }}>
-          {tab === "home" && <HomeScreen />}
-          {(tab === "tx") && <TreatmentsScreen onBook={handleBook} />}
-          {tab === "ord" && <OrdersScreen />}
-          {tab === "acc" && <AccountScreen />}
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", paddingBottom: currentScreen ? 0 : 84 }}>
+          {tab === "home" && <HomeScreen {...navProps} />}
+          {tab === "tx" && <TreatmentsScreen {...navProps} />}
+          {tab === "ord" && <OrdersScreen {...navProps} />}
+          {tab === "acc" && <AccountScreen {...navProps} />}
         </div>
 
-        {/* Bottom tab bar */}
-        <TabBar active={tab} onSelect={handleTabSelect} />
+        {/* Bottom tab bar — hidden when a sub-screen is open */}
+        {!currentScreen && <TabBar active={tab} onSelect={handleTabSelect} />}
+
+        {/* Nav stack screens (slide over) */}
+        {currentScreen?.type === "treatment-detail" && (
+          <TreatmentDetailScreen slug={currentScreen.slug} {...navProps} />
+        )}
+        {currentScreen?.type === "membership" && (
+          <MembershipScreen {...navProps} />
+        )}
+        {currentScreen?.type === "notifications" && (
+          <NotificationsScreen {...navProps} />
+        )}
 
         {/* Booking overlay */}
         {booking.open && (

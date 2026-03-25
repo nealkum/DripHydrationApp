@@ -2,36 +2,37 @@ import { B, T, SERIF, SANS } from "../theme";
 import { Stars } from "../components/Stars";
 import { SectionHeader } from "../components/SectionHeader";
 import { Btn } from "../components/Btn";
-
-const quickActions = [
-  { icon: "↻", label: "Rebook",   sub: "Last IV",   grad: `linear-gradient(135deg, #2d5a5a, #3d8b8b)` },
-  { icon: "📅", label: "Schedule", sub: "New Appt",  grad: `linear-gradient(135deg, #3d5a2d, #5b8b3d)` },
-  { icon: "📦", label: "Shop",     sub: "Shipped",   grad: `linear-gradient(135deg, #5a4a2d, #c9a96e)` },
-];
+import type { NavProps } from "../MobileApp";
 
 const pastTreatments = [
-  { name: "Recovery IV",  date: "Mar 15", price: "$209", rated: true,  rating: 5 },
-  { name: "Hangover IV",  date: "Feb 28", price: "$179", rated: true,  rating: 5 },
-  { name: "NAD+ IV",      date: "Feb 1",  price: "$559", rated: false, rating: 0 },
-  { name: "Immune Boost", date: "Jan 18", price: "$179", rated: true,  rating: 5 },
+  { name: "Recovery IV",  date: "Mar 15", price: "$209", rated: true,  rating: 5, slug: "recovery-performance" },
+  { name: "Hangover IV",  date: "Feb 28", price: "$179", rated: true,  rating: 5, slug: "hangover-iv" },
+  { name: "NAD+ IV",      date: "Feb 1",  price: "$559", rated: false, rating: 0, slug: "nad-iv-therapy" },
+  { name: "Immune Boost", date: "Jan 18", price: "$179", rated: true,  rating: 5, slug: "immunity-boost" },
 ];
 
 const recommendations = [
-  { name: "NAD+ Boost IV",    reason: "Pairs with your Recovery IV",          price: "$699", memberPrice: "$559", icon: "🧬" },
-  { name: "Glutathione Push", reason: "87% of Recovery clients add this",     price: "+$35",  memberPrice: null,   icon: "✨" },
-  { name: "Semaglutide",      reason: "Shipped to your door monthly",         price: "$299/mo", memberPrice: null, icon: "📦" },
+  { name: "NAD+ Boost IV",    reason: "Pairs with your Recovery IV",      price: "$699", memberPrice: "$559", icon: "🧬", slug: "nad-boost" },
+  { name: "Glutathione Push", reason: "87% of Recovery clients add this", price: "+$35",  memberPrice: null,   icon: "✨", slug: null },
+  { name: "Semaglutide",      reason: "Shipped to your door monthly",     price: "$299/mo", memberPrice: null, icon: "📦", slug: "weight-loss-semaglutide" },
 ];
 
 const pressLogos = [
-  { name: "The New York Times", style: { fontFamily: "'Times New Roman', Georgia, serif", fontStyle: "italic" as const, fontWeight: 700, fontSize: 12 } },
+  { name: "The New York Times",     style: { fontFamily: "'Times New Roman', Georgia, serif", fontStyle: "italic" as const, fontWeight: 700, fontSize: 12 } },
   { name: "The Wall Street Journal.", style: { fontFamily: "Georgia, serif", fontWeight: 400, fontSize: 10 } },
-  { name: "VICE",       style: { fontFamily: SANS, fontWeight: 900, fontSize: 13, letterSpacing: "0.04em" } },
-  { name: "Yahoo!",     style: { fontFamily: SANS, fontWeight: 800, fontSize: 13 } },
-  { name: "New York Post", style: { fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 11 } },
-  { name: "POPSUGAR",   style: { fontFamily: SANS, fontWeight: 400, fontSize: 10, letterSpacing: "0.18em" } },
+  { name: "VICE",                   style: { fontFamily: SANS, fontWeight: 900, fontSize: 13, letterSpacing: "0.04em" } },
+  { name: "Yahoo!",                 style: { fontFamily: SANS, fontWeight: 800, fontSize: 13 } },
+  { name: "New York Post",          style: { fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 11 } },
+  { name: "POPSUGAR",               style: { fontFamily: SANS, fontWeight: 400, fontSize: 10, letterSpacing: "0.18em" } },
 ];
 
-export function HomeScreen() {
+export function HomeScreen({ navigate, onTabChange, openBooking }: NavProps) {
+  const quickActions = [
+    { icon: "↻", label: "Rebook",   sub: "Last IV",  grad: `linear-gradient(135deg, #2d5a5a, #3d8b8b)`, action: () => openBooking("recovery-performance") },
+    { icon: "📅", label: "Schedule", sub: "New Appt", grad: `linear-gradient(135deg, #3d5a2d, #5b8b3d)`, action: () => openBooking() },
+    { icon: "📦", label: "Shop",     sub: "Shipped",  grad: `linear-gradient(135deg, #5a4a2d, #c9a96e)`,  action: () => onTabChange("tx") },
+  ];
+
   return (
     <div style={{ fontFamily: SANS }}>
       {/* Promo banner */}
@@ -53,9 +54,13 @@ export function HomeScreen() {
             <span>Next treatment tomorrow</span>
           </div>
         </div>
-        <div style={{ width: 42, height: 42, borderRadius: "50%", background: B.bgCard, border: `1px solid ${B.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+        <button
+          onClick={() => navigate({ type: "notifications" })}
+          style={{ width: 42, height: 42, borderRadius: "50%", background: B.bgCard, border: `1px solid ${B.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, cursor: "pointer", position: "relative" }}
+        >
           🔔
-        </div>
+          <span style={{ position: "absolute", top: 8, right: 8, width: 8, height: 8, borderRadius: "50%", background: B.cyan, border: `2px solid ${B.bg}` }} />
+        </button>
       </div>
 
       {/* Quick actions */}
@@ -63,6 +68,7 @@ export function HomeScreen() {
         {quickActions.map((a, i) => (
           <button
             key={i}
+            onClick={a.action}
             style={{ flex: 1, border: `1px solid ${B.border}`, background: B.bgCard, borderRadius: 16, padding: "16px 4px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer" }}
           >
             <div style={{ width: 46, height: 46, borderRadius: 14, background: a.grad, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
@@ -82,7 +88,12 @@ export function HomeScreen() {
             <div style={{ ...T.over, fontSize: 10, color: B.cyan }}>Upcoming Appointment</div>
             <div style={{ marginLeft: "auto", ...T.tag, fontSize: 9, color: B.cyan, background: `${B.cyan}18`, padding: "3px 10px", borderRadius: 20, border: `1px solid ${B.cyan}30` }}>Confirmed</div>
           </div>
-          <div style={{ ...T.product, fontSize: 19, color: B.textPrimary, marginBottom: 14 }}>Recovery & Performance IV</div>
+          <div
+            onClick={() => navigate({ type: "treatment-detail", slug: "recovery-performance" })}
+            style={{ ...T.product, fontSize: 19, color: B.textPrimary, marginBottom: 14, cursor: "pointer" }}
+          >
+            Recovery & Performance IV
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
             <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, display: "flex", alignItems: "center", gap: 10 }}>
               <span>📅</span><span>Tomorrow, Mar 26 · 2:00 PM</span>
@@ -95,20 +106,25 @@ export function HomeScreen() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }}>Manage</Btn>
-            <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }}>Reschedule</Btn>
-            <Btn style={{ flex: 1, padding: "11px 0" }}>Add-On</Btn>
+            <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }} onClick={() => onTabChange("ord")}>Manage</Btn>
+            <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }} onClick={() => openBooking("recovery-performance")}>Reschedule</Btn>
+            <Btn style={{ flex: 1, padding: "11px 0" }} onClick={() => openBooking("recovery-performance")}>Add-On</Btn>
           </div>
         </div>
       </div>
 
       {/* Past treatments */}
       <div style={{ padding: "0 20px 20px" }}>
-        <SectionHeader action="View All →">Your Treatments</SectionHeader>
+        <SectionHeader action="View All →" onAction={() => onTabChange("ord")}>Your Treatments</SectionHeader>
         <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4, marginRight: -20, paddingRight: 20 }}>
           {pastTreatments.map((t, i) => (
             <div key={i} style={{ minWidth: 156, background: B.bgCard, border: `1px solid ${B.border}`, borderRadius: 14, padding: 14, flexShrink: 0 }}>
-              <div style={{ ...T.product, fontSize: 14, color: B.textPrimary, marginBottom: 4 }}>{t.name}</div>
+              <div
+                onClick={() => navigate({ type: "treatment-detail", slug: t.slug })}
+                style={{ ...T.product, fontSize: 14, color: B.textPrimary, marginBottom: 4, cursor: "pointer" }}
+              >
+                {t.name}
+              </div>
               <div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400, marginBottom: 4 }}>{t.date} · {t.price}</div>
               <div style={{ marginBottom: 10 }}>
                 {t.rated
@@ -116,7 +132,7 @@ export function HomeScreen() {
                   : <span style={{ ...T.ui, fontSize: 11, color: B.gold, fontWeight: 600 }}>⭐ Rate</span>
                 }
               </div>
-              <Btn variant="ghost" style={{ width: "100%", padding: "9px 0", fontSize: 11 }}>Rebook</Btn>
+              <Btn variant="ghost" style={{ width: "100%", padding: "9px 0", fontSize: 11 }} onClick={() => openBooking(t.slug)}>Rebook</Btn>
             </div>
           ))}
         </div>
@@ -129,7 +145,8 @@ export function HomeScreen() {
         {recommendations.map((r, i) => (
           <div
             key={i}
-            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: i < recommendations.length - 1 ? `1px solid ${B.borderLight}` : "none" }}
+            onClick={() => r.slug && navigate({ type: "treatment-detail", slug: r.slug })}
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: i < recommendations.length - 1 ? `1px solid ${B.borderLight}` : "none", cursor: r.slug ? "pointer" : "default" }}
           >
             <div style={{ width: 48, height: 48, borderRadius: 12, background: B.bgCard, border: `1px solid ${B.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
               {r.icon}
@@ -173,7 +190,12 @@ export function HomeScreen() {
             <div style={{ ...T.ui, fontSize: 12, color: B.textMuted, fontWeight: 400 }}>
               Savings this year: <span style={{ color: B.gold, fontWeight: 700 }}>$1,080</span>
             </div>
-            <span style={{ ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>Benefits →</span>
+            <span
+              onClick={() => navigate({ type: "membership" })}
+              style={{ ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}
+            >
+              Benefits →
+            </span>
           </div>
         </div>
       </div>

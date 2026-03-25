@@ -1,19 +1,20 @@
 import { B, T, SANS } from "../theme";
 import { Stars } from "../components/Stars";
 import { Btn } from "../components/Btn";
+import type { NavProps } from "../MobileApp";
 
 const upcoming = [
-  { name: "Recovery & Performance IV", date: "Mar 26, 2026", time: "2:00 PM", location: "Your home · 123 Main St", nurse: "Sarah K.", status: "Confirmed" },
+  { name: "Recovery & Performance IV", slug: "recovery-performance", date: "Mar 26, 2026", time: "2:00 PM", location: "Your home · 123 Main St", nurse: "Sarah K.", status: "Confirmed" },
 ];
 
 const shipped = [
-  { name: "Semaglutide — Monthly", shipped: "Shipped Mar 10", status: "Delivered Mar 13", next: "Next shipment: Apr 10" },
+  { name: "Semaglutide — Monthly", slug: "weight-loss-semaglutide", shippedDate: "Shipped Mar 10", status: "Delivered Mar 13", next: "Next shipment: Apr 10" },
 ];
 
 const past = [
-  { name: "Recovery & Performance IV", date: "Mar 15, 2026", price: "$209", nurse: "Sarah K.",  rating: 5 },
-  { name: "Hangover IV",               date: "Feb 28, 2026", price: "$179", nurse: "Maria G.",  rating: 5 },
-  { name: "NAD+ IV Therapy",           date: "Feb 1, 2026",  price: "$559", nurse: "David R.",  rating: 5 },
+  { name: "Recovery & Performance IV", slug: "recovery-performance", date: "Mar 15, 2026", price: "$209", nurse: "Sarah K.",  rating: 5 },
+  { name: "Hangover IV",               slug: "hangover-iv",          date: "Feb 28, 2026", price: "$179", nurse: "Maria G.",  rating: 5 },
+  { name: "NAD+ IV Therapy",           slug: "nad-iv-therapy",       date: "Feb 1, 2026",  price: "$559", nurse: "David R.",  rating: 5 },
 ];
 
 const stats = [
@@ -23,7 +24,7 @@ const stats = [
   { label: "Streak",        value: "3 months", icon: "🔥" },
 ];
 
-export function OrdersScreen() {
+export function OrdersScreen({ navigate, openBooking }: NavProps) {
   return (
     <div style={{ fontFamily: SANS }}>
       <div style={{ padding: "16px 20px 16px" }}>
@@ -36,7 +37,12 @@ export function OrdersScreen() {
         {upcoming.map((o, i) => (
           <div key={i} style={{ background: B.bgCard, border: `1px solid ${B.cyan}20`, borderRadius: 14, padding: 16, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-              <div style={{ ...T.product, fontSize: 17, color: B.textPrimary }}>{o.name}</div>
+              <div
+                onClick={() => navigate({ type: "treatment-detail", slug: o.slug })}
+                style={{ ...T.product, fontSize: 17, color: B.textPrimary, cursor: "pointer" }}
+              >
+                {o.name}
+              </div>
               <span style={{ ...T.tag, fontSize: 9, color: B.cyan, background: `${B.cyan}15`, padding: "3px 10px", borderRadius: 20, border: `1px solid ${B.cyan}25`, flexShrink: 0, marginLeft: 8 }}>{o.status}</span>
             </div>
             <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, lineHeight: 1.9 }}>
@@ -45,8 +51,8 @@ export function OrdersScreen() {
               👩‍⚕️ Nurse {o.nurse}
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-              <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }}>RESCHEDULE</Btn>
-              <Btn style={{ flex: 1, padding: "11px 0" }}>ADD ADD-ONS</Btn>
+              <Btn variant="outline" style={{ flex: 1, padding: "11px 0" }} onClick={() => openBooking(o.slug)}>RESCHEDULE</Btn>
+              <Btn style={{ flex: 1, padding: "11px 0" }} onClick={() => openBooking(o.slug)}>ADD ADD-ONS</Btn>
             </div>
           </div>
         ))}
@@ -59,14 +65,19 @@ export function OrdersScreen() {
           <div key={i} style={{ background: B.bgCard, border: `1px solid ${B.border}`, borderRadius: 14, padding: 16, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <span>📦</span>
-              <div style={{ ...T.product, fontSize: 15, color: B.textPrimary }}>{o.name}</div>
+              <div
+                onClick={() => navigate({ type: "treatment-detail", slug: o.slug })}
+                style={{ ...T.product, fontSize: 15, color: B.textPrimary, cursor: "pointer" }}
+              >
+                {o.name}
+              </div>
             </div>
             <div style={{ ...T.body, fontSize: 12, color: B.textSecondary, lineHeight: 1.9 }}>
-              {o.shipped} · {o.status}<br />{o.next}
+              {o.shippedDate} · {o.status}<br />{o.next}
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
               <Btn variant="outline" style={{ flex: 1, padding: "10px 0", fontSize: 11 }}>MANAGE</Btn>
-              <Btn variant="ghost" style={{ flex: 1, padding: "10px 0", fontSize: 11 }}>REORDER</Btn>
+              <Btn variant="ghost" style={{ flex: 1, padding: "10px 0", fontSize: 11 }} onClick={() => openBooking(o.slug)}>REORDER</Btn>
             </div>
           </div>
         ))}
@@ -76,7 +87,11 @@ export function OrdersScreen() {
       <div style={{ padding: "0 20px" }}>
         <div style={{ ...T.over, fontSize: 10, color: B.textMuted, marginBottom: 10 }}>Past Treatments</div>
         {past.map((o, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: `1px solid ${B.borderLight}` }}>
+          <div
+            key={i}
+            onClick={() => navigate({ type: "treatment-detail", slug: o.slug })}
+            style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: `1px solid ${B.borderLight}`, cursor: "pointer" }}
+          >
             <div style={{ width: 42, height: 42, borderRadius: 12, background: B.bgCard, border: `1px solid ${B.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
               💉
             </div>

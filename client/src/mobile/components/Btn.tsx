@@ -4,7 +4,7 @@ interface BtnProps {
   children: React.ReactNode;
   variant?: "primary" | "outline" | "ghost";
   style?: React.CSSProperties;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   fullWidth?: boolean;
 }
 

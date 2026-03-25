@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { B, T, SERIF, SANS } from "../theme";
+import type { NavProps } from "../MobileApp";
 
 const sections = [
   {
@@ -19,19 +21,38 @@ const sections = [
   {
     title: "Notifications",
     icon: "🔔",
-    items: ["Appointment reminders", "Nurse en route alerts", "Promotions"],
+    items: ["Appointment reminders on", "Nurse en route alerts on", "Promotions off"],
   },
 ];
 
 const links = [
-  { label: "Referral Program — Give $25, Get $25", icon: "🎁" },
-  { label: "Medical Profile",                       icon: "🏥" },
-  { label: "Help & FAQ",                            icon: "❓" },
-  { label: "About Drip Hydration",                  icon: "ℹ️" },
-  { label: "Privacy & Terms",                       icon: "🔒" },
+  { label: "Membership & Plan",               icon: "💎", action: "membership" },
+  { label: "Referral Program — Give $25, Get $25", icon: "🎁", action: null },
+  { label: "Medical Profile",                  icon: "🏥", action: null },
+  { label: "Help & FAQ",                       icon: "❓", action: null },
+  { label: "About Drip Hydration",             icon: "ℹ️", action: null },
+  { label: "Privacy & Terms",                  icon: "🔒", action: null },
 ];
 
-export function AccountScreen() {
+export function AccountScreen({ navigate }: NavProps) {
+  const [loggedOut, setLoggedOut] = useState(false);
+
+  if (loggedOut) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: 40, fontFamily: SANS }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>👋</div>
+        <div style={{ ...T.heading, fontSize: 24, color: B.textPrimary, marginBottom: 8, textAlign: "center" }}>You've been logged out</div>
+        <div style={{ ...T.body, fontSize: 14, color: B.textMuted, textAlign: "center", marginBottom: 24 }}>Sign back in to access your account and bookings</div>
+        <button
+          onClick={() => setLoggedOut(false)}
+          style={{ padding: "14px 32px", borderRadius: 12, background: `linear-gradient(135deg, ${B.tealAccent}, ${B.cyan})`, color: "#fff", border: "none", cursor: "pointer", fontFamily: SANS, fontWeight: 700, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.08em" }}
+        >
+          Sign Back In
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontFamily: SANS }}>
       <div style={{ padding: "16px 20px 4px" }}>
@@ -46,7 +67,12 @@ export function AccountScreen() {
         <div>
           <div style={{ ...T.product, fontSize: 18, color: B.textPrimary }}>Neal Kumar</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-            <span style={{ ...T.tag, fontSize: 10, color: B.gold, background: `${B.gold}15`, padding: "3px 10px", borderRadius: 10, border: `1px solid ${B.gold}20` }}>💎 IV MEMBER</span>
+            <span
+              onClick={() => navigate({ type: "membership" })}
+              style={{ ...T.tag, fontSize: 10, color: B.gold, background: `${B.gold}15`, padding: "3px 10px", borderRadius: 10, border: `1px solid ${B.gold}20`, cursor: "pointer" }}
+            >
+              💎 IV MEMBER
+            </span>
             <span style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>Since Jan 2025</span>
           </div>
         </div>
@@ -79,6 +105,7 @@ export function AccountScreen() {
           {links.map((l, i) => (
             <div
               key={i}
+              onClick={() => l.action === "membership" && navigate({ type: "membership" })}
               style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: i < links.length - 1 ? `1px solid ${B.borderLight}` : "none", cursor: "pointer" }}
             >
               <span style={{ fontSize: 15 }}>{l.icon}</span>
@@ -91,7 +118,10 @@ export function AccountScreen() {
 
       {/* Log out */}
       <div style={{ padding: "16px 20px 24px" }}>
-        <button style={{ width: "100%", padding: "14px", borderRadius: 12, ...T.btn, fontSize: 13, border: "1px solid rgba(220,38,38,0.25)", background: "rgba(220,38,38,0.06)", color: "#ef4444", cursor: "pointer", fontFamily: SANS }}>
+        <button
+          onClick={() => setLoggedOut(true)}
+          style={{ width: "100%", padding: "14px", borderRadius: 12, ...T.btn, fontSize: 13, border: "1px solid rgba(220,38,38,0.25)", background: "rgba(220,38,38,0.06)", color: "#ef4444", cursor: "pointer", fontFamily: SANS }}
+        >
           LOG OUT
         </button>
       </div>
