@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { TreatmentCard } from "@/components/treatments/treatment-card";
@@ -8,26 +8,44 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
-interface ShippedFilter {
+interface CategoryFilter {
   id: string;
   label: string;
   slugs?: string[];
 }
 
-const shippedFilters: ShippedFilter[] = [
+const vitaminWellnessFilters: CategoryFilter[] = [
+  { id: "all",       label: "All Treatments" },
+  { id: "wellness",  label: "Wellness",  slugs: ["myers-cocktail-plus", "hydration-package", "beauty-drip", "migraine-relief", "nad-iv-therapy"] },
+  { id: "recovery",  label: "Recovery",  slugs: ["hangover-iv", "recovery-performance"] },
+  { id: "immunity",  label: "Immunity",  slugs: ["immunity-boost"] },
+  { id: "energy",    label: "Energy",    slugs: ["energy-boost", "nad-boost"] },
+];
+
+const shippedFilters: CategoryFilter[] = [
   { id: "all",          label: "All" },
   { id: "weight-loss",  label: "Weight Loss",  slugs: ["weight-loss-semaglutide", "weight-loss-tirzepatide"] },
   { id: "mental-health",label: "Mental Health", slugs: ["ketamine-therapy"] },
   { id: "nad",          label: "NAD",           slugs: ["nad-injections", "nad-nasal-spray", "niagen-nr-injections"] },
   { id: "peptides",     label: "Peptides",      slugs: ["peptide-sermorelin", "peptide-cjc-ipamorelin", "peptide-ghk-cu"] },
   { id: "trt",          label: "TRT",           slugs: ["testosterone-trt", "testosterone-enclomiphene"] },
-  { id: "vitamins",     label: "Vitamins",       slugs: ["vitamin-b12", "vitamin-lipostat"] },
+  { id: "vitamins",     label: "Vitamins",      slugs: ["vitamin-b12", "vitamin-lipostat"] },
 ];
+
+const filtersByCategorySlug: Record<string, CategoryFilter[]> = {
+  "vitamin-wellness": vitaminWellnessFilters,
+  "shipped-to-you":   shippedFilters,
+};
 
 export default function CategoryTreatments() {
   const [, params] = useRoute("/treatments/:categorySlug");
   const categorySlug = params?.categorySlug;
   const [activeFilter, setActiveFilter] = useState("all");
+
+  // Reset filter whenever the category changes
+  useEffect(() => {
+    setActiveFilter("all");
+  }, [categorySlug]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -42,12 +60,12 @@ export default function CategoryTreatments() {
     (t) => t.categoryId === category?.id
   );
 
-  const isShipped = categorySlug === "shipped-to-you";
+  const filters = categorySlug ? filtersByCategorySlug[categorySlug] : undefined;
 
   const visibleTreatments = (() => {
     if (!categoryTreatments) return [];
-    if (!isShipped || activeFilter === "all") return categoryTreatments;
-    const filter = shippedFilters.find((f) => f.id === activeFilter);
+    if (!filters || activeFilter === "all") return categoryTreatments;
+    const filter = filters.find((f) => f.id === activeFilter);
     if (!filter?.slugs) return categoryTreatments;
     return categoryTreatments.filter((t) => filter.slugs!.includes(t.slug));
   })();
@@ -105,11 +123,11 @@ export default function CategoryTreatments() {
           </p>
         </div>
 
-        {/* Filter pills — Shipped To You only */}
-        {isShipped && (
+        {/* Filter pills — shown for categories that have a filter set */}
+        {filters && (
           <div className="mb-8" data-testid="section-filters">
             <div className="flex flex-wrap gap-2">
-              {shippedFilters.map((filter) => {
+              {filters.map((filter) => {
                 const isActive = activeFilter === filter.id;
                 const count = filter.slugs
                   ? categoryTreatments?.filter((t) => filter.slugs!.includes(t.slug)).length ?? 0
@@ -149,7 +167,7 @@ export default function CategoryTreatments() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg mb-4">No treatments in this category yet.</p>
+            <p className="text-muted-foreground text-lg mb-4">No treatments match this filter.</p>
             <Button variant="outline" onClick={() => setActiveFilter("all")} data-testid="button-clear-filter">
               Show all treatments
             </Button>
