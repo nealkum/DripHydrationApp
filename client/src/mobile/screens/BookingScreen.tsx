@@ -90,7 +90,7 @@ export function BookingScreen({ slug, onClose }: BookingScreenProps) {
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ ...T.price, fontSize: 16, color: B.textPrimary }}>${Math.round(t.price / 100)}</div>
-                    <div style={{ ...T.ui, fontSize: 11, color: B.cyan, fontWeight: 600 }}>${Math.round(t.price * 0.75 / 100)} mbr</div>
+                    <div style={{ ...T.ui, fontSize: 11, color: B.cyan, fontWeight: 600 }}>${Math.round(t.price * 0.75 / 100)} with membership</div>
                   </div>
                 </div>
               ))}
