@@ -1,8 +1,8 @@
-# Drip Hydration IV Therapy Booking App
+# Drip Hydration — Mobile App Prototype
 
 ## Overview
 
-Drip Hydration is a premium IV therapy booking platform that enables customers to schedule in-home IV hydration and wellness treatments with licensed nurses. The application provides a modern, mobile-first booking experience with treatments spanning vitamin wellness IVs and NAD+ therapy across 100+ cities. The platform also features a comprehensive membership program with four pricing tiers offering exclusive benefits and savings.
+Drip Hydration is a premium IV therapy platform. The frontend has been rebuilt as a **native mobile app prototype** — a phone-frame UI (390px) shown centered on a dark background, simulating what a customer-facing iOS/Android app would look like. It features five tabs: Home, Treatments, Book (center + button), Orders, and Account. Treatments data is fetched live from the Express/PostgreSQL backend. The prototype uses inline styles (not Tailwind) to exactly match the design specification.
 
 ## User Preferences
 

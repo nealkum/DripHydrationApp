@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Drip Hydration — Mobile App Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body { background: #0a1f1f; overflow-x: hidden; }
+  ::-webkit-scrollbar { display: none; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState } = React;
+
+const B = {
+  teal: "#1a3a3a", tealLight: "#2d5a5a", tealAccent: "#3d8b8b",
+  cyan: "#5bbfbf", cyanLight: "#7ed4d4",
+  gold: "#c9a96e", goldLight: "#e8d5a8",
+  cream: "#f5f0e8", warmWhite: "#faf8f4", white: "#ffffff",
+  bg: "#0f2b2b", bgCard: "#1a3a3a", bgSurface: "#163030",
+  textPrimary: "#ffffff", textSecondary: "rgba(255,255,255,0.7)",
+  textMuted: "rgba(255,255,255,0.45)", textDark: "#1a3a3a",
+  border: "rgba(255,255,255,0.1)", borderLight: "rgba(255,255,255,0.06)",
+  success: "#5bbfbf", cardR: "16px",
+};
+
+const SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";
+const SANS = "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+const T = {
+  hero: { fontFamily: SERIF, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15 },
+  heading: { fontFamily: SERIF, fontWeight: 700, letterSpacing: "-0.01em", lineHeight: 1.2 },
+  product: { fontFamily: SANS, fontWeight: 700, letterSpacing: "-0.01em" },
+  body: { fontFamily: SANS, fontWeight: 400, lineHeight: 1.5 },
+  ui: { fontFamily: SANS, fontWeight: 500 },
+  price: { fontFamily: SANS, fontWeight: 700 },
+  btn: { fontFamily: SANS, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" },
+  tag: { fontFamily: SANS, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" },
+  over: { fontFamily: SANS, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em" },
+};
+
+const quickActions = [
+  { icon: "↻", label: "Rebook", sub: "Last IV", grad: "linear-gradient(135deg, #2d5a5a, #3d8b8b)" },
+  { icon: "📅", label: "Schedule", sub: "New Appt", grad: "linear-gradient(135deg, #3d5a2d, #5b8b3d)" },
+  { icon: "📦", label: "Shop", sub: "Shipped", grad: "linear-gradient(135deg, #5a4a2d, " + B.gold + ")" },
+];
+const past = [
+  { n: "Recovery IV", d: "Mar 15", p: "$209", rated: true, r: 5 },
+  { n: "Hangover IV", d: "Feb 28", p: "$179", rated: true, r: 5 },
+  { n: "NAD+ IV", d: "Feb 1", p: "$559", rated: false, r: 0 },
+  { n: "Immune Boost", d: "Jan 18", p: "$179", rated: true, r: 5 },
+];
+const recs = [
+  { n: "NAD+ Boost IV", why: "Pairs with your Recovery IV", pr: "$699", mp: "$559", e: "🧬" },
+  { n: "Glutathione Push", why: "87% of Recovery clients add this", pr: "+$35", mp: null, e: "✨" },
+  { n: "Semaglutide", why: "Shipped to your door monthly", pr: "$299/mo", mp: null, e: "📦" },
+];
+const cats = ["All", "IV Therapy", "Shipped", "Specialty"];
+const txs = [
+  { n: "All-Inclusive", b: "Overall Wellness", pr: 399, mp: 279, rt: 4.9, rv: 2150, c: "IV Therapy", pop: true },
+  { n: "Myers Cocktail", b: "Restore & Relax", pr: 299, mp: 209, rt: 4.9, rv: 2150, c: "IV Therapy" },
+  { n: "Hangover", b: "Hangovers", pr: 299, mp: 179, rt: 4.9, rv: 2840, c: "IV Therapy" },
+  { n: "Recovery & Performance", b: "Recovery", pr: 299, mp: 209, rt: 4.9, rv: 1520, c: "IV Therapy" },
+  { n: "NAD+ IV Therapy", b: "Anti-Aging", pr: 749, mp: 559, rt: 4.8, rv: 620, c: "IV Therapy", pop: true },
+  { n: "Immune Boost", b: "Immunity", pr: 249, mp: 179, rt: 4.8, rv: 1890, c: "IV Therapy" },
+  { n: "Beauty", b: "Skin & Hair", pr: 299, mp: 209, rt: 4.9, rv: 980, c: "IV Therapy" },
+  { n: "Semaglutide", b: "Weight Loss", pr: 299, mp: null, rt: 4.8, rv: 1240, c: "Shipped", sh: true },
+  { n: "Tirzepatide", b: "Weight Loss", pr: 399, mp: null, rt: 4.9, rv: 960, c: "Shipped", sh: true },
+  { n: "Sermorelin", b: "Anti-Aging", pr: 399, mp: 319, rt: 4.8, rv: 560, c: "Shipped", sh: true },
+  { n: "TRT Injections", b: "Low Testosterone", pr: 199, mp: 159, rt: 4.8, rv: 740, c: "Shipped", sh: true },
+  { n: "Iron IV Therapy", b: "Iron Deficiency", pr: 899, mp: 699, rt: 4.9, rv: 380, c: "Specialty" },
+  { n: "Ketamine IV", b: "Depression & PTSD", pr: 999, mp: 899, rt: 4.9, rv: 520, c: "Specialty" },
+  { n: "Exosome IV", b: "Regeneration", pr: 1999, mp: 1799, rt: 5.0, rv: 140, c: "Specialty" },
+];
+const ords = [
+  { t: "up", n: "Recovery & Performance IV", dt: "Mar 26, 2026", tm: "2:00 PM", loc: "Your home · 123 Main St", nurse: "Sarah K.", st: "Confirmed" },
+  { t: "p", n: "Recovery & Performance IV", dt: "Mar 15, 2026", pr: "$209", nurse: "Sarah K.", r: 5 },
+  { t: "p", n: "Hangover IV", dt: "Feb 28, 2026", pr: "$179", nurse: "Maria G.", r: 5 },
+  { t: "sh", n: "Semaglutide — Monthly", dt: "Shipped Mar 10", st: "Delivered Mar 13", nx: "Next shipment: Apr 10" },
+  { t: "p", n: "NAD+ IV Therapy", dt: "Feb 1, 2026", pr: "$559", nurse: "David R.", r: 5 },
+];
+
+function Stars({ r, s = 11 }) { return <span style={{ display: "inline-flex", gap: 1 }}>{[1,2,3,4,5].map(i => <span key={i} style={{ color: i <= r ? B.gold : "rgba(255,255,255,0.12)", fontSize: s }}>★</span>)}</span>; }
+function SH({ children, right }) { return <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}><div style={{ ...T.heading, fontSize: 20, color: B.textPrimary }}>{children}</div>{right && <span style={{ ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>{right}</span>}</div>; }
+
+function Btn({ children, v = "p", style: sx, ...p }) {
+  const base = { ...T.btn, fontSize: 12, borderRadius: 10, cursor: "pointer", border: "none", padding: "12px 22px", textAlign: "center", display: "inline-block" };
+  const vs = {
+    p: { ...base, background: "linear-gradient(135deg, " + B.tealAccent + ", " + B.cyan + ")", color: "#fff", boxShadow: "0 4px 14px " + B.cyan + "25" },
+    o: { ...base, background: "transparent", color: B.textSecondary, border: "1px solid " + B.border },
+    g: { ...base, background: B.cyan + "10", color: B.cyan, border: "1px solid " + B.cyan + "30" },
+  };
+  return <button style={{ ...vs[v], ...sx }} {...p}>{children}</button>;
+}
+
+function Frame({ children }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", background: "#0a1f1f", padding: "12px 0", fontFamily: SANS }}>
+      <div style={{ width: 390, minHeight: 844, background: B.bg, borderRadius: 44, boxShadow: "0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
+        <div style={{ height: 54, background: B.bg, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 4, flexShrink: 0 }}><div style={{ width: 126, height: 5, borderRadius: 3, background: "rgba(255,255,255,0.3)" }} /></div>
+        <div style={{ flex: 1, overflow: "auto", paddingBottom: 84 }}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function Tabs({ a, set }) {
+  const ts = [{ id: "home", ic: "🏠", l: "Home" },{ id: "tx", ic: "💉", l: "Treatments" },{ id: "bk", ic: "＋", l: "Book", ctr: true },{ id: "ord", ic: "📋", l: "Orders" },{ id: "acc", ic: "👤", l: "Account" }];
+  return (
+    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(15,43,43,0.95)", backdropFilter: "blur(20px)", borderTop: "1px solid " + B.border, display: "flex", justifyContent: "space-around", alignItems: "flex-start", padding: "6px 0 24px", zIndex: 100 }}>
+      {ts.map(t => (
+        <button key={t.id} onClick={() => set(t.id)} style={{ border: "none", background: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", padding: "4px 12px" }}>
+          {t.ctr ? <div style={{ width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, " + B.tealAccent + ", " + B.cyan + ")", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 26, fontWeight: 300, marginTop: -20, boxShadow: "0 4px 20px rgba(91,191,191,0.4)", border: "3px solid rgba(255,255,255,0.1)" }}>{t.ic}</div>
+          : <span style={{ fontSize: 22, lineHeight: 1, filter: a === t.id ? "none" : "grayscale(0.5) opacity(0.6)" }}>{t.ic}</span>}
+          <span style={{ ...T.ui, fontSize: 10, fontWeight: a === t.id ? 600 : 400, color: a === t.id ? B.cyan : B.textMuted }}>{t.l}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Home() {
+  return (<div>
+    <div style={{ background: "linear-gradient(90deg, " + B.gold + ", #d4b878)", padding: "8px 20px", textAlign: "center" }}>
+      <span style={{ ...T.ui, fontSize: 11, color: B.teal }}>Celebrating 10 Years of Drip | 10% OFF with code </span>
+      <span style={{ ...T.tag, fontSize: 10, color: B.teal, background: "rgba(255,255,255,0.4)", padding: "2px 8px", borderRadius: 4 }}>DRIPDECADE</span>
+    </div>
+    <div style={{ padding: "20px 20px 6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div>
+        <div style={{ ...T.hero, fontSize: 26, color: B.textPrimary }}>Good morning, Neal</div>
+        <div style={{ ...T.ui, fontSize: 13, color: B.textSecondary, marginTop: 4, display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: B.gold, fontWeight: 600, fontSize: 12 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: B.cyan, boxShadow: "0 0 8px " + B.cyan }} />IV Member</span>
+          <span style={{ color: B.textMuted }}>·</span><span>Next treatment tomorrow</span>
+        </div>
+      </div>
+      <div style={{ width: 42, height: 42, borderRadius: "50%", background: B.bgCard, border: "1px solid " + B.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🔔</div>
+    </div>
+    <div style={{ padding: "16px 20px 20px", display: "flex", gap: 10 }}>
+      {quickActions.map((a, i) => (
+        <button key={i} style={{ flex: 1, border: "1px solid " + B.border, background: B.bgCard, borderRadius: 16, padding: "16px 4px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer", transition: "transform 0.15s" }} onMouseDown={e => e.currentTarget.style.transform = "scale(0.95)"} onMouseUp={e => e.currentTarget.style.transform = "scale(1)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+          <div style={{ width: 46, height: 46, borderRadius: 14, background: a.grad, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>{a.icon}</div>
+          <div style={{ ...T.ui, fontSize: 12, fontWeight: 600, color: B.textPrimary }}>{a.label}</div>
+          <div style={{ ...T.ui, fontSize: 10, color: B.textMuted, fontWeight: 400 }}>{a.sub}</div>
+        </button>
+      ))}
+    </div>
+    <div style={{ padding: "0 20px 20px" }}>
+      <div style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: B.cardR, padding: 20, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: 140, height: 140, background: "radial-gradient(circle at top right, " + B.tealAccent + "15, transparent 70%)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+          <div style={{ ...T.over, fontSize: 10, color: B.cyan }}>Upcoming Appointment</div>
+          <div style={{ marginLeft: "auto", ...T.tag, fontSize: 9, color: B.cyan, background: B.cyan + "18", padding: "3px 10px", borderRadius: 20, border: "1px solid " + B.cyan + "30" }}>Confirmed</div>
+        </div>
+        <div style={{ ...T.product, fontSize: 19, color: B.textPrimary, marginBottom: 14 }}>Recovery & Performance IV</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
+          <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, display: "flex", alignItems: "center", gap: 10 }}><span>📅</span><span>Tomorrow, Mar 26 · 2:00 PM</span></div>
+          <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, display: "flex", alignItems: "center", gap: 10 }}><span>📍</span><span>Your home · 123 Main St, LA</span></div>
+          <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, display: "flex", alignItems: "center", gap: 10 }}><span>👩‍⚕️</span><span>Nurse Sarah K. · <Stars r={5} s={10} /></span></div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Btn v="o" style={{ flex: 1, padding: "11px 0" }}>Manage</Btn>
+          <Btn v="o" style={{ flex: 1, padding: "11px 0" }}>Reschedule</Btn>
+          <Btn style={{ flex: 1, padding: "11px 0" }}>Add-On</Btn>
+        </div>
+      </div>
+    </div>
+    <div style={{ padding: "0 20px" }}>
+      <SH right="View All →">Your Treatments</SH>
+      <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 4, marginRight: -20, paddingRight: 20 }}>
+        {past.map((t, i) => (
+          <div key={i} style={{ minWidth: 156, background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, padding: 14, flexShrink: 0 }}>
+            <div style={{ ...T.product, fontSize: 14, color: B.textPrimary, marginBottom: 4 }}>{t.n}</div>
+            <div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400, marginBottom: 4 }}>{t.d} · {t.p}</div>
+            <div style={{ marginBottom: 10 }}>{t.rated ? <Stars r={t.r} s={10} /> : <span style={{ ...T.ui, fontSize: 11, color: B.gold, fontWeight: 600 }}>⭐ Rate</span>}</div>
+            <Btn v="g" style={{ width: "100%", padding: "9px 0", fontSize: 11 }}>Rebook</Btn>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div style={{ padding: "24px 20px 0" }}>
+      <SH>Recommended for You</SH>
+      <div style={{ ...T.body, fontSize: 12, color: B.textMuted, marginTop: -10, marginBottom: 14 }}>Based on your treatment history</div>
+      {recs.map((r, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: i < recs.length - 1 ? "1px solid " + B.borderLight : "none" }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, background: B.bgCard, border: "1px solid " + B.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{r.e}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ ...T.product, fontSize: 14, color: B.textPrimary }}>{r.n}</div>
+            <div style={{ ...T.body, fontSize: 11, color: B.textMuted, marginTop: 2 }}>{r.why}</div>
+          </div>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
+            <div style={{ ...T.price, fontSize: 14, color: B.textPrimary }}>{r.pr}</div>
+            {r.mp && <div style={{ ...T.ui, fontSize: 11, color: B.cyan, fontWeight: 600 }}>{r.mp}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div style={{ padding: "24px 20px" }}>
+      <div style={{ background: "linear-gradient(135deg, " + B.bgCard + " 0%, " + B.tealLight + " 100%)", border: "1px solid " + B.gold + "30", borderRadius: B.cardR, padding: 20, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, background: "radial-gradient(circle, " + B.gold + "12, transparent 70%)" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 20 }}>💎</span>
+            <div><div style={{ ...T.product, fontSize: 15, color: B.textPrimary }}>IV Membership</div><div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>Active since Jan 2025</div></div>
+          </div>
+          <span style={{ ...T.tag, fontSize: 10, color: B.cyan, background: B.cyan + "15", padding: "4px 12px", borderRadius: 20, border: "1px solid " + B.cyan + "25" }}>Active</span>
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", ...T.ui, fontSize: 12, color: B.textSecondary, marginBottom: 8, fontWeight: 400 }}><span>2 of 4 sessions this month</span><span style={{ color: B.cyan, fontWeight: 600 }}>50%</span></div>
+          <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,0.08)" }}><div style={{ height: "100%", width: "50%", borderRadius: 3, background: "linear-gradient(90deg, " + B.tealAccent + ", " + B.cyan + ")" }} /></div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ ...T.ui, fontSize: 12, color: B.textMuted, fontWeight: 400 }}>Savings this year: <span style={{ color: B.gold, fontWeight: 700 }}>$1,080</span></div>
+          <span style={{ ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>Benefits →</span>
+        </div>
+      </div>
+    </div>
+    <div style={{ padding: "0 20px 24px" }}>
+      <div style={{ ...T.over, textAlign: "center", fontSize: 9, color: B.textMuted, marginBottom: 14 }}>As Featured In</div>
+      <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", opacity: 0.35 }}>
+        {[{ n: "The New York Times", s: { fontFamily: "'Times New Roman', Georgia, serif", fontStyle: "italic", fontWeight: 700, fontSize: 12 } },
+          { n: "The Wall Street Journal.", s: { fontFamily: "Georgia, serif", fontWeight: 400, fontSize: 10 } },
+          { n: "VICE", s: { fontFamily: SANS, fontWeight: 900, fontSize: 13, letterSpacing: "0.04em" } },
+          { n: "Yahoo!", s: { fontFamily: SANS, fontWeight: 800, fontSize: 13 } },
+          { n: "New York Post", s: { fontFamily: "Georgia, serif", fontWeight: 800, fontSize: 11 } },
+          { n: "POPSUGAR", s: { fontFamily: SANS, fontWeight: 400, fontSize: 10, letterSpacing: "0.18em" } },
+        ].map(p => <span key={p.n} style={{ ...p.s, color: B.textPrimary, whiteSpace: "nowrap" }}>{p.n}</span>)}
+      </div>
+    </div>
+  </div>);
+}
+
+function Tx() {
+  const [ac, setAc] = useState("All");
+  const [q, setQ] = useState("");
+  const fl = txs.filter(t => { const mc = ac === "All" || t.c === ac; const mq = !q || t.n.toLowerCase().includes(q.toLowerCase()) || t.b.toLowerCase().includes(q.toLowerCase()); return mc && mq; });
+  return (<div>
+    <div style={{ padding: "16px 20px 10px" }}><div style={{ ...T.hero, fontSize: 28, color: B.textPrimary }}>Treatments</div></div>
+    <div style={{ padding: "0 20px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, background: B.bgCard, borderRadius: 12, padding: "12px 14px", border: "1px solid " + B.border }}>
+        <span style={{ fontSize: 15, color: B.textMuted }}>🔍</span>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search treatments, symptoms..." style={{ border: "none", background: "none", outline: "none", flex: 1, ...T.body, fontSize: 14, color: B.textPrimary }} />
+      </div>
+    </div>
+    <div style={{ display: "flex", gap: 8, padding: "0 20px 18px", overflowX: "auto" }}>
+      {cats.map(c => <button key={c} onClick={() => setAc(c)} style={{ ...T.btn, padding: "9px 20px", borderRadius: 24, border: ac === c ? "none" : "1px solid " + B.border, background: ac === c ? "linear-gradient(135deg, " + B.tealAccent + ", " + B.cyan + ")" : "transparent", color: ac === c ? "#fff" : B.textSecondary, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>{c}</button>)}
+    </div>
+    <div style={{ padding: "0 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+      {fl.map((t, i) => (
+        <div key={i} style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, padding: 16, display: "flex", gap: 14, position: "relative", cursor: "pointer" }}>
+          {t.sh && <div style={{ position: "absolute", top: 10, right: 10, ...T.tag, fontSize: 8, color: B.gold, background: B.gold + "15", padding: "3px 8px", borderRadius: 6, border: "1px solid " + B.gold + "25" }}>📦 SHIPPED</div>}
+          {t.pop && !t.sh && <div style={{ position: "absolute", top: 10, right: 10, ...T.tag, fontSize: 8, color: B.cyan, background: B.cyan + "15", padding: "3px 8px", borderRadius: 6, border: "1px solid " + B.cyan + "25" }}>MOST POPULAR</div>}
+          <div style={{ flex: 1 }}>
+            <span style={{ display: "inline-block", ...T.tag, fontSize: 9, color: B.cyan, background: B.cyan + "10", padding: "3px 10px", borderRadius: 6, marginBottom: 8, border: "1px solid " + B.cyan + "18" }}>BEST FOR: {t.b.toUpperCase()}</span>
+            <div style={{ ...T.product, fontSize: 16, color: B.textPrimary, marginBottom: 6 }}>{t.n}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 10 }}>
+              <Stars r={Math.round(t.rt)} s={10} /><span style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>{t.rt} ({t.rv.toLocaleString()})</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ ...T.price, fontSize: 20, color: B.textPrimary }}>${t.pr}</span>
+              {t.mp && <span style={{ ...T.ui, fontSize: 12, fontWeight: 600, color: B.cyan }}>${t.mp} member</span>}
+              {t.sh && !t.mp && <span style={{ ...T.ui, fontSize: 12, color: B.textMuted, fontWeight: 400 }}>/month</span>}
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", flexShrink: 0 }}>
+            <Btn style={{ padding: "11px 22px", fontSize: 12 }}>BOOK NOW</Btn>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>);
+}
+
+function Ord() {
+  return (<div>
+    <div style={{ padding: "16px 20px 16px" }}><div style={{ ...T.hero, fontSize: 28, color: B.textPrimary }}>Orders & Activity</div></div>
+    <div style={{ padding: "0 20px 12px" }}>
+      <div style={{ ...T.over, fontSize: 10, color: B.textMuted, marginBottom: 10 }}>Upcoming</div>
+      {ords.filter(o => o.t === "up").map((o, i) => (
+        <div key={i} style={{ background: B.bgCard, border: "1px solid " + B.cyan + "20", borderRadius: 14, padding: 16, marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ ...T.product, fontSize: 17, color: B.textPrimary }}>{o.n}</div>
+            <span style={{ ...T.tag, fontSize: 9, color: B.cyan, background: B.cyan + "15", padding: "3px 10px", borderRadius: 20, border: "1px solid " + B.cyan + "25" }}>{o.st}</span>
+          </div>
+          <div style={{ ...T.body, fontSize: 13, color: B.textSecondary, lineHeight: 1.9 }}>📅 {o.dt} · {o.tm}<br/>📍 {o.loc}<br/>👩‍⚕️ Nurse {o.nurse}</div>
+          <div style={{ display: "flex", gap: 8, marginTop: 14 }}><Btn v="o" style={{ flex: 1, padding: "11px 0" }}>RESCHEDULE</Btn><Btn style={{ flex: 1, padding: "11px 0" }}>ADD ADD-ONS</Btn></div>
+        </div>))}
+    </div>
+    <div style={{ padding: "0 20px 12px" }}>
+      <div style={{ ...T.over, fontSize: 10, color: B.textMuted, marginBottom: 10 }}>Shipped Orders</div>
+      {ords.filter(o => o.t === "sh").map((o, i) => (
+        <div key={i} style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, padding: 16, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}><span>📦</span><div style={{ ...T.product, fontSize: 15, color: B.textPrimary }}>{o.n}</div></div>
+          <div style={{ ...T.body, fontSize: 12, color: B.textSecondary, lineHeight: 1.9 }}>{o.dt} · {o.st}<br/>{o.nx}</div>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}><Btn v="o" style={{ flex: 1, padding: "10px 0", fontSize: 11 }}>MANAGE</Btn><Btn v="g" style={{ flex: 1, padding: "10px 0", fontSize: 11 }}>REORDER</Btn></div>
+        </div>))}
+    </div>
+    <div style={{ padding: "0 20px" }}>
+      <div style={{ ...T.over, fontSize: 10, color: B.textMuted, marginBottom: 10 }}>Past Treatments</div>
+      {ords.filter(o => o.t === "p").map((o, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 0", borderBottom: "1px solid " + B.borderLight }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: B.bgCard, border: "1px solid " + B.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>💉</div>
+          <div style={{ flex: 1 }}><div style={{ ...T.ui, fontSize: 14, fontWeight: 600, color: B.textPrimary }}>{o.n}</div><div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>{o.dt} · Nurse {o.nurse}</div></div>
+          <div style={{ textAlign: "right", flexShrink: 0 }}><div style={{ ...T.price, fontSize: 14, color: B.textPrimary }}>{o.pr}</div><Stars r={o.r} s={9} /></div>
+        </div>))}
+    </div>
+    <div style={{ padding: "24px 20px" }}>
+      <div style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, padding: 18 }}>
+        <div style={{ ...T.heading, fontSize: 16, color: B.textPrimary, marginBottom: 14 }}>2026 Wellness Summary</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          {[{ l: "Treatments", v: "8", e: "💉" },{ l: "Saved", v: "$1,080", e: "💰" },{ l: "Top Treatment", v: "Recovery", e: "🏆" },{ l: "Streak", v: "3 months", e: "🔥" }].map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ fontSize: 20 }}>{s.e}</span><div><div style={{ ...T.price, fontSize: 17, color: B.textPrimary }}>{s.v}</div><div style={{ ...T.ui, fontSize: 10, color: B.textMuted, fontWeight: 400 }}>{s.l}</div></div></div>))}
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+function Acc() {
+  const secs = [{ t: "Personal Info", i: "👤", its: ["Neal Kumar", "neal@driphydration.com", "(310) 555-0100"] },{ t: "Saved Addresses", i: "📍", its: ["Home · 123 Main St, Los Angeles", "Office · 456 Wilshire Blvd"] },{ t: "Payment Methods", i: "💳", its: ["Visa •••• 4242", "Apple Pay"] },{ t: "Notifications", i: "🔔", its: ["Appointment reminders", "Nurse en route alerts", "Promotions"] }];
+  const lnks = [{ l: "Referral Program — Give $25, Get $25", i: "🎁" },{ l: "Medical Profile", i: "🏥" },{ l: "Help & FAQ", i: "❓" },{ l: "About Drip Hydration", i: "ℹ️" },{ l: "Privacy & Terms", i: "🔒" }];
+  return (<div>
+    <div style={{ padding: "16px 20px 4px" }}><div style={{ ...T.hero, fontSize: 28, color: B.textPrimary }}>Account</div></div>
+    <div style={{ padding: "12px 20px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ width: 58, height: 58, borderRadius: "50%", background: "linear-gradient(135deg, " + B.tealAccent + ", " + B.cyan + ")", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 22, fontWeight: 700, fontFamily: SERIF, border: "3px solid rgba(255,255,255,0.1)" }}>NK</div>
+      <div><div style={{ ...T.product, fontSize: 18, color: B.textPrimary }}>Neal Kumar</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+          <span style={{ ...T.tag, fontSize: 10, color: B.gold, background: B.gold + "15", padding: "3px 10px", borderRadius: 10, border: "1px solid " + B.gold + "20" }}>💎 IV MEMBER</span>
+          <span style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>Since Jan 2025</span>
+        </div>
+      </div>
+    </div>
+    {secs.map((s, i) => (
+      <div key={i} style={{ padding: "0 20px", marginBottom: 10 }}>
+        <div style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, overflow: "hidden" }}>
+          <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid " + B.borderLight }}>
+            <span style={{ fontSize: 15 }}>{s.i}</span><span style={{ ...T.ui, fontSize: 14, fontWeight: 700, color: B.textPrimary }}>{s.t}</span>
+            <span style={{ marginLeft: "auto", ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>Edit</span>
+          </div>
+          {s.its.map((it, j) => <div key={j} style={{ padding: "11px 16px 11px 42px", ...T.body, fontSize: 13, color: B.textSecondary, borderBottom: j < s.its.length - 1 ? "1px solid " + B.borderLight : "none" }}>{it}</div>)}
+        </div>
+      </div>))}
+    <div style={{ padding: "8px 20px" }}>
+      <div style={{ background: B.bgCard, border: "1px solid " + B.border, borderRadius: 14, overflow: "hidden" }}>
+        {lnks.map((l, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: i < lnks.length - 1 ? "1px solid " + B.borderLight : "none", cursor: "pointer" }}>
+            <span style={{ fontSize: 15 }}>{l.i}</span><span style={{ ...T.ui, fontSize: 14, color: B.textPrimary, fontWeight: 500, flex: 1 }}>{l.l}</span><span style={{ color: B.textMuted, fontSize: 14 }}>›</span>
+          </div>))}
+      </div>
+    </div>
+    <div style={{ padding: "16px 20px 24px" }}>
+      <button style={{ width: "100%", padding: "14px", borderRadius: 12, ...T.btn, fontSize: 13, border: "1px solid rgba(220,38,38,0.25)", background: "rgba(220,38,38,0.06)", color: "#ef4444", cursor: "pointer" }}>LOG OUT</button>
+    </div>
+  </div>);
+}
+
+function App() {
+  const [tab, setTab] = useState("home");
+  return (<Frame>
+    {tab === "home" && <Home />}
+    {(tab === "tx" || tab === "bk") && <Tx />}
+    {tab === "ord" && <Ord />}
+    {tab === "acc" && <Acc />}
+    <Tabs a={tab} set={setTab} />
+  </Frame>);
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
