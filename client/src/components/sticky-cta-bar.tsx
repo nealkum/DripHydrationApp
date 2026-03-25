@@ -46,7 +46,7 @@ export function StickyCTABar() {
   } else {
     label = "Book IV Therapy";
     subtext = "Same-Day Available · Nurse in 2 Hours";
-    href = "/treatments";
+    href = "/treatments/vitamin-wellness";
   }
 
   return (
