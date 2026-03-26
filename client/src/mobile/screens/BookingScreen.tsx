@@ -3,13 +3,15 @@ import { B, T, SANS } from "../theme";
 import { Btn } from "../components/Btn";
 import { useQuery } from "@tanstack/react-query";
 import type { Treatment } from "@shared/schema";
+import type { BookingConfirmation } from "../MobileApp";
 
 interface BookingScreenProps {
   slug?: string;
   onClose: () => void;
+  onConfirmed: (details: BookingConfirmation) => void;
 }
 
-type Step = "select" | "location" | "schedule" | "confirm" | "success";
+type Step = "select" | "location" | "schedule" | "confirm";
 
 const TIMES = ["9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM","6:00 PM"];
 const DATES = ["Today, Mar 25","Tomorrow, Mar 26","Thu, Mar 27","Fri, Mar 28","Sat, Mar 29","Sun, Mar 30"];
@@ -21,7 +23,7 @@ const shippedSlugs = new Set([
   "testosterone-trt","testosterone-enclomiphene","vitamin-b12","vitamin-lipostat",
 ]);
 
-export function BookingScreen({ slug, onClose }: BookingScreenProps) {
+export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps) {
   const [step, setStep] = useState<Step>(slug ? "location" : "select");
   const [selectedSlug, setSelectedSlug] = useState(slug ?? "");
   const [address, setAddress] = useState("");
@@ -31,40 +33,44 @@ export function BookingScreen({ slug, onClose }: BookingScreenProps) {
 
   const { data: treatments = [] } = useQuery<Treatment[]>({ queryKey: ["/api/treatments"] });
   const treatment = treatments.find((t) => t.slug === selectedSlug);
-
   const ivTreatments = treatments.filter((t) => !shippedSlugs.has(t.slug));
 
   const flowSteps: Step[] = slug
-    ? ["location", "schedule", "confirm", "success"]
-    : ["select", "location", "schedule", "confirm", "success"];
+    ? ["location", "schedule", "confirm"]
+    : ["select", "location", "schedule", "confirm"];
   const stepIdx = flowSteps.indexOf(step);
-  const progressSteps = flowSteps.filter((s) => s !== "success");
+
+  function handleConfirm() {
+    onConfirmed({
+      treatmentName: treatment?.name ?? selectedSlug,
+      date: selectedDate,
+      time: selectedTime,
+      address: `${address}, ${city}`,
+      price: treatment ? Math.round(treatment.price / 100) : 0,
+    });
+  }
 
   return (
     <div style={{ position: "absolute", inset: 0, background: B.bg, zIndex: 200, display: "flex", flexDirection: "column", fontFamily: SANS }}>
       {/* Header */}
-      {step !== "success" && (
-        <div style={{ padding: "16px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${B.border}`, flexShrink: 0 }}>
-          {stepIdx > 0
-            ? <button onClick={() => setStep(flowSteps[stepIdx - 1])} style={{ background: "none", border: "none", color: B.cyan, fontSize: 14, cursor: "pointer", fontFamily: SANS, ...T.ui }}>← Back</button>
-            : <span />
-          }
-          <div style={{ ...T.product, fontSize: 16, color: B.textPrimary }}>Book IV Therapy</div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: B.textMuted, fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
-        </div>
-      )}
+      <div style={{ padding: "16px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${B.border}`, flexShrink: 0 }}>
+        {stepIdx > 0
+          ? <button onClick={() => setStep(flowSteps[stepIdx - 1])} style={{ background: "none", border: "none", color: B.cyan, fontSize: 14, cursor: "pointer", fontFamily: SANS, ...T.ui }}>← Back</button>
+          : <span />
+        }
+        <div style={{ ...T.product, fontSize: 16, color: B.textPrimary }}>Book IV Therapy</div>
+        <button onClick={onClose} style={{ background: "none", border: "none", color: B.textMuted, fontSize: 22, cursor: "pointer", lineHeight: 1 }}>×</button>
+      </div>
 
       {/* Progress bar */}
-      {step !== "success" && (
-        <div style={{ display: "flex", gap: 6, justifyContent: "center", padding: "12px 0", flexShrink: 0 }}>
-          {progressSteps.map((s, i) => (
-            <div key={s} style={{ width: 28, height: 4, borderRadius: 2, background: stepIdx >= i ? B.cyan : `${B.cyan}25`, transition: "background 0.3s" }} />
-          ))}
-        </div>
-      )}
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", padding: "12px 0", flexShrink: 0 }}>
+        {flowSteps.map((s, i) => (
+          <div key={s} style={{ width: 28, height: 4, borderRadius: 2, background: stepIdx >= i ? B.cyan : `${B.cyan}25`, transition: "background 0.3s" }} />
+        ))}
+      </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: step === "success" ? 0 : "8px 20px 20px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "8px 20px 20px" }}>
 
         {/* Step 1: Select treatment */}
         {step === "select" && (
@@ -149,11 +155,7 @@ export function BookingScreen({ slug, onClose }: BookingScreenProps) {
               ))}
             </div>
 
-            <Btn
-              fullWidth
-              style={{ marginTop: 24, padding: "14px 0", fontSize: 13 }}
-              onClick={() => { if (address && city) setStep("schedule"); }}
-            >
+            <Btn fullWidth style={{ marginTop: 24, padding: "14px 0", fontSize: 13 }} onClick={() => { if (address && city) setStep("schedule"); }}>
               CONTINUE
             </Btn>
             {(!address || !city) && (
@@ -232,64 +234,20 @@ export function BookingScreen({ slug, onClose }: BookingScreenProps) {
             </div>
 
             <div style={{ background: `${B.gold}08`, border: `1px solid ${B.gold}25`, borderRadius: 12, padding: "12px 16px", marginBottom: 20 }}>
-              <div style={{ ...T.ui, fontSize: 12, color: B.gold, fontWeight: 600, marginBottom: 4 }}>💎 Members save ${treatment ? Math.round(treatment.price * 0.25 / 100) : "—"}</div>
-              <div style={{ ...T.body, fontSize: 12, color: B.textMuted }}>Join a membership to pay ${treatment ? Math.round(treatment.price * 0.75 / 100) : "—"} instead</div>
+              <div style={{ ...T.ui, fontSize: 12, color: B.gold, fontWeight: 600, marginBottom: 4 }}>
+                💎 Members save ${treatment ? Math.round(treatment.price * 0.25 / 100) : "—"}
+              </div>
+              <div style={{ ...T.body, fontSize: 12, color: B.textMuted }}>
+                Join a membership to pay ${treatment ? Math.round(treatment.price * 0.75 / 100) : "—"} instead
+              </div>
             </div>
 
-            <Btn fullWidth style={{ padding: "15px 0", fontSize: 14 }} onClick={() => setStep("success")}>
+            <Btn fullWidth style={{ padding: "15px 0", fontSize: 14 }} onClick={handleConfirm}>
               CONFIRM BOOKING
             </Btn>
 
             <div style={{ ...T.body, fontSize: 11, color: B.textMuted, textAlign: "center", marginTop: 12 }}>
               Free cancellation up to 2 hours before appointment
-            </div>
-          </div>
-        )}
-
-        {/* Step 5: Success */}
-        {step === "success" && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100%", padding: 32, textAlign: "center" }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%", background: `linear-gradient(135deg, ${B.tealAccent}, ${B.cyan})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, marginBottom: 24, boxShadow: `0 0 40px ${B.cyan}35` }}>
-              ✓
-            </div>
-            <div style={{ ...T.hero, fontSize: 28, color: B.textPrimary, marginBottom: 8 }}>You're Booked!</div>
-            <div style={{ ...T.body, fontSize: 14, color: B.textSecondary, marginBottom: 6, lineHeight: 1.6 }}>
-              {treatment?.name}
-            </div>
-            <div style={{ ...T.ui, fontSize: 13, color: B.cyan, fontWeight: 600, marginBottom: 32 }}>
-              {selectedDate} · {selectedTime}
-            </div>
-
-            <div style={{ width: "100%", background: B.bgCard, border: `1px solid ${B.border}`, borderRadius: 14, padding: 20, marginBottom: 24, textAlign: "left" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontSize: 18 }}>📍</span>
-                  <span style={{ ...T.body, fontSize: 13, color: B.textSecondary }}>{address}, {city}</span>
-                </div>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontSize: 18 }}>👩‍⚕️</span>
-                  <span style={{ ...T.body, fontSize: 13, color: B.textSecondary }}>A licensed nurse will be assigned shortly</span>
-                </div>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontSize: 18 }}>📧</span>
-                  <span style={{ ...T.body, fontSize: 13, color: B.textSecondary }}>Confirmation sent to neal@driphydration.com</span>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ background: `${B.gold}08`, border: `1px solid ${B.gold}20`, borderRadius: 12, padding: "14px 16px", marginBottom: 24, width: "100%", textAlign: "left" }}>
-              <div style={{ ...T.ui, fontSize: 12, color: B.gold, fontWeight: 700, marginBottom: 4 }}>🎁 Refer a friend, get $25</div>
-              <div style={{ ...T.body, fontSize: 12, color: B.textMuted }}>Share your link: drip.hy/neal-kumar</div>
-            </div>
-
-            <Btn fullWidth style={{ padding: "14px 0", fontSize: 13, marginBottom: 12 }} onClick={onClose}>
-              DONE
-            </Btn>
-            <div
-              onClick={onClose}
-              style={{ ...T.ui, fontSize: 13, color: B.textMuted, cursor: "pointer" }}
-            >
-              View in Orders →
             </div>
           </div>
         )}

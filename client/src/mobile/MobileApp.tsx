@@ -6,6 +6,7 @@ import { TreatmentsScreen } from "./screens/TreatmentsScreen";
 import { OrdersScreen } from "./screens/OrdersScreen";
 import { AccountScreen } from "./screens/AccountScreen";
 import { BookingScreen } from "./screens/BookingScreen";
+import { BookingConfirmationScreen } from "./screens/BookingConfirmationScreen";
 import { TreatmentDetailScreen } from "./screens/TreatmentDetailScreen";
 import { MembershipScreen } from "./screens/MembershipScreen";
 import { NotificationsScreen } from "./screens/NotificationsScreen";
@@ -15,13 +16,22 @@ import { EditProfileScreen } from "./screens/EditProfileScreen";
 
 export type TabId = "home" | "tx" | "bk" | "ord" | "acc";
 
+export interface BookingConfirmation {
+  treatmentName: string;
+  date: string;
+  time: string;
+  address: string;
+  price: number;
+}
+
 export type NavScreen =
   | { type: "treatment-detail"; slug: string }
   | { type: "membership" }
   | { type: "notifications" }
   | { type: "referral" }
   | { type: "help" }
-  | { type: "edit-profile" };
+  | { type: "edit-profile" }
+  | { type: "booking-confirmation"; details: BookingConfirmation };
 
 export interface NavProps {
   navigate: (screen: NavScreen) => void;
@@ -58,6 +68,11 @@ export function MobileApp() {
     setNavStack([]);
   }
 
+  function handleBookingConfirmed(details: BookingConfirmation) {
+    setBooking({ open: false });
+    setNavStack((prev) => [...prev, { type: "booking-confirmation", details }]);
+  }
+
   const navProps: NavProps = { navigate, goBack, onTabChange: handleTabSelect, openBooking };
 
   return (
@@ -92,7 +107,7 @@ export function MobileApp() {
         {/* Bottom tab bar — hidden when a sub-screen is open */}
         {!currentScreen && <TabBar active={tab} onSelect={handleTabSelect} />}
 
-        {/* Nav stack screens (slide over) */}
+        {/* Nav stack screens */}
         {currentScreen?.type === "treatment-detail" && (
           <TreatmentDetailScreen slug={currentScreen.slug} {...navProps} />
         )}
@@ -111,12 +126,16 @@ export function MobileApp() {
         {currentScreen?.type === "edit-profile" && (
           <EditProfileScreen {...navProps} />
         )}
+        {currentScreen?.type === "booking-confirmation" && (
+          <BookingConfirmationScreen details={currentScreen.details} {...navProps} />
+        )}
 
         {/* Booking overlay */}
         {booking.open && (
           <BookingScreen
             slug={booking.slug}
             onClose={() => setBooking({ open: false })}
+            onConfirmed={handleBookingConfirmed}
           />
         )}
       </div>
