@@ -13,6 +13,7 @@ export function BookingConfirmationScreen({ details, goBack, onTabChange, naviga
   const [sharedReferral, setSharedReferral] = useState(false);
   const memberSavings = Math.round(details.price * 0.25);
   const memberPrice = details.price - memberSavings;
+  const creditsEarned = Math.max(1, Math.round(details.totalCharged * 0.1));
 
   return (
     <div style={{ position: "absolute", inset: 0, background: B.bg, zIndex: 150, display: "flex", flexDirection: "column", fontFamily: SANS, overflowY: "auto" }}>
@@ -80,9 +81,22 @@ export function BookingConfirmationScreen({ details, goBack, onTabChange, naviga
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: `${B.cyan}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 15 }}>💳</div>
-              <div>
-                <div style={{ ...T.ui, fontSize: 13, fontWeight: 600, color: B.textPrimary }}>${details.price} charged</div>
-                <div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>Visa •••• 4242</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {details.creditsApplied > 0 && (
+                    <span style={{ ...T.ui, fontSize: 12, color: B.textMuted, fontWeight: 400, textDecoration: "line-through" }}>${details.price}</span>
+                  )}
+                  <span style={{ ...T.ui, fontSize: 13, fontWeight: 700, color: details.creditsApplied > 0 ? B.cyan : B.textPrimary }}>
+                    ${details.totalCharged} charged
+                  </span>
+                </div>
+                {details.creditsApplied > 0 ? (
+                  <div style={{ ...T.ui, fontSize: 11, color: B.cyan, fontWeight: 500 }}>
+                    ${details.creditsApplied} Drip Credits applied · Visa •••• 4242
+                  </div>
+                ) : (
+                  <div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>Visa •••• 4242</div>
+                )}
               </div>
             </div>
           </div>
@@ -101,6 +115,27 @@ export function BookingConfirmationScreen({ details, goBack, onTabChange, naviga
               📋 View Orders
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Credits earned banner */}
+      <div style={{ padding: "0 20px 20px" }}>
+        <div style={{ background: `linear-gradient(135deg, ${B.cyan}12, ${B.tealAccent}10)`, border: `1px solid ${B.cyan}30`, borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${B.cyan}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>⭐</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ ...T.ui, fontSize: 13, fontWeight: 700, color: B.textPrimary, marginBottom: 2 }}>
+              You earned <span style={{ color: B.cyan }}>${creditsEarned} in Drip Credits</span>
+            </div>
+            <div style={{ ...T.body, fontSize: 11, color: B.textMuted }}>
+              10% back on every visit · Balance updates after your appointment
+            </div>
+          </div>
+          {details.creditsApplied > 0 && (
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ ...T.ui, fontSize: 10, color: B.textMuted, marginBottom: 2 }}>Used today</div>
+              <div style={{ ...T.ui, fontSize: 13, color: B.cyan, fontWeight: 700 }}>−${details.creditsApplied}</div>
+            </div>
+          )}
         </div>
       </div>
 

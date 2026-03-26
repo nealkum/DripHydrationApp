@@ -22,6 +22,8 @@ export interface BookingConfirmation {
   time: string;
   address: string;
   price: number;
+  creditsApplied: number;
+  totalCharged: number;
 }
 
 export type NavScreen =

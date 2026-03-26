@@ -23,6 +23,8 @@ const shippedSlugs = new Set([
   "testosterone-trt","testosterone-enclomiphene","vitamin-b12","vitamin-lipostat",
 ]);
 
+const USER_CREDITS = 75; // mock loyalty balance
+
 export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps) {
   const [step, setStep] = useState<Step>(slug ? "location" : "select");
   const [selectedSlug, setSelectedSlug] = useState(slug ?? "");
@@ -31,14 +33,44 @@ export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
+  // Credits state
+  const [creditsOn, setCreditsOn] = useState(false);
+  const [creditsApplied, setCreditsApplied] = useState(0);
+
   const { data: treatments = [] } = useQuery<Treatment[]>({ queryKey: ["/api/treatments"] });
   const treatment = treatments.find((t) => t.slug === selectedSlug);
   const ivTreatments = treatments.filter((t) => !shippedSlugs.has(t.slug));
+
+  const rawPrice = treatment ? Math.round(treatment.price / 100) : 0;
+  const discount = creditsOn ? creditsApplied : 0;
+  const totalDue = Math.max(0, rawPrice - discount);
 
   const flowSteps: Step[] = slug
     ? ["location", "schedule", "confirm"]
     : ["select", "location", "schedule", "confirm"];
   const stepIdx = flowSteps.indexOf(step);
+
+  // Quick-pick credit amounts capped to available balance and price
+  function creditOptions(price: number) {
+    const max = Math.min(USER_CREDITS, price);
+    const opts: number[] = [];
+    if (max >= 10) opts.push(10);
+    if (max >= 25) opts.push(25);
+    if (max >= 50) opts.push(50);
+    if (!opts.includes(max)) opts.push(max);
+    return opts;
+  }
+
+  function toggleCredits() {
+    const next = !creditsOn;
+    setCreditsOn(next);
+    if (!next) setCreditsApplied(0);
+    else {
+      // Default to full available credits up to price
+      const max = Math.min(USER_CREDITS, rawPrice);
+      setCreditsApplied(max);
+    }
+  }
 
   function handleConfirm() {
     onConfirmed({
@@ -46,7 +78,9 @@ export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps
       date: selectedDate,
       time: selectedTime,
       address: `${address}, ${city}`,
-      price: treatment ? Math.round(treatment.price / 100) : 0,
+      price: rawPrice,
+      creditsApplied: discount,
+      totalCharged: totalDue,
     });
   }
 
@@ -214,7 +248,8 @@ export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps
           <div>
             <div style={{ ...T.heading, fontSize: 22, color: B.textPrimary, marginBottom: 20 }}>Confirm Booking</div>
 
-            <div style={{ background: B.bgCard, border: `1px solid ${B.border}`, borderRadius: 14, padding: 18, marginBottom: 16 }}>
+            {/* Booking summary */}
+            <div style={{ background: B.bgCard, border: `1px solid ${B.border}`, borderRadius: 14, padding: 18, marginBottom: 14 }}>
               <div style={{ ...T.over, fontSize: 10, color: B.textMuted, marginBottom: 14 }}>BOOKING SUMMARY</div>
               {[
                 { label: "Treatment", value: treatment?.name ?? selectedSlug },
@@ -227,12 +262,123 @@ export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps
                   <span style={{ ...T.ui, fontSize: 13, color: B.textPrimary, fontWeight: 600, maxWidth: "55%", textAlign: "right" }}>{row.value}</span>
                 </div>
               ))}
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14, paddingTop: 14, borderTop: `1px solid ${B.border}` }}>
-                <span style={{ ...T.product, fontSize: 15, color: B.textPrimary }}>Total</span>
-                <span style={{ ...T.price, fontSize: 18, color: B.textPrimary }}>${treatment ? Math.round(treatment.price / 100) : "—"}</span>
+
+              {/* Price breakdown */}
+              <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${B.border}`, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ ...T.ui, fontSize: 13, color: B.textMuted, fontWeight: 400 }}>Treatment price</span>
+                  <span style={{ ...T.ui, fontSize: 13, color: B.textPrimary, fontWeight: 600 }}>${rawPrice}</span>
+                </div>
+                {creditsOn && creditsApplied > 0 && (
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ ...T.ui, fontSize: 13, color: B.cyan, fontWeight: 500 }}>Drip Credits applied</span>
+                    <span style={{ ...T.ui, fontSize: 13, color: B.cyan, fontWeight: 700 }}>−${creditsApplied}</span>
+                  </div>
+                )}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTop: `1px solid ${B.borderLight}` }}>
+                  <span style={{ ...T.product, fontSize: 15, color: B.textPrimary }}>Total due</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {creditsOn && creditsApplied > 0 && (
+                      <span style={{ ...T.ui, fontSize: 13, color: B.textMuted, fontWeight: 400, textDecoration: "line-through" }}>${rawPrice}</span>
+                    )}
+                    <span style={{ ...T.price, fontSize: 20, color: creditsOn && creditsApplied > 0 ? B.cyan : B.textPrimary }}>${totalDue}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* Drip Credits card */}
+            <div style={{
+              background: creditsOn ? `${B.cyan}08` : B.bgCard,
+              border: `1px solid ${creditsOn ? B.cyan + "40" : B.border}`,
+              borderRadius: 14,
+              padding: 16,
+              marginBottom: 14,
+              transition: "all 0.2s",
+            }}>
+              {/* Header row */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: creditsOn ? 14 : 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: `${B.cyan}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                    ⭐
+                  </div>
+                  <div>
+                    <div style={{ ...T.ui, fontSize: 14, fontWeight: 700, color: B.textPrimary }}>Drip Credits</div>
+                    <div style={{ ...T.ui, fontSize: 11, color: B.textMuted, fontWeight: 400 }}>
+                      <span style={{ color: B.cyan, fontWeight: 600 }}>${USER_CREDITS}.00</span> available
+                    </div>
+                  </div>
+                </div>
+
+                {/* Toggle */}
+                <div
+                  onClick={toggleCredits}
+                  style={{
+                    width: 46, height: 26, borderRadius: 13,
+                    background: creditsOn ? B.cyan : B.border,
+                    position: "relative", cursor: "pointer",
+                    transition: "background 0.2s", flexShrink: 0,
+                  }}
+                >
+                  <div style={{
+                    width: 20, height: 20, borderRadius: "50%", background: "#fff",
+                    position: "absolute", top: 3,
+                    left: creditsOn ? 23 : 3,
+                    transition: "left 0.2s",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                  }} />
+                </div>
+              </div>
+
+              {/* Credit amount selector — shown when toggled on */}
+              {creditsOn && (
+                <div>
+                  <div style={{ ...T.over, fontSize: 9, color: B.textMuted, marginBottom: 10 }}>APPLY AMOUNT</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                    {creditOptions(rawPrice).map((amt) => (
+                      <button
+                        key={amt}
+                        onClick={() => setCreditsApplied(amt)}
+                        style={{
+                          padding: "8px 14px", borderRadius: 10,
+                          border: `1px solid ${creditsApplied === amt ? B.cyan : B.border}`,
+                          background: creditsApplied === amt ? `${B.cyan}18` : B.bg,
+                          color: creditsApplied === amt ? B.cyan : B.textSecondary,
+                          fontSize: 13, fontFamily: SANS, fontWeight: 700, cursor: "pointer",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        {amt === Math.min(USER_CREDITS, rawPrice) ? `$${amt} (max)` : `$${amt}`}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCreditsApplied(0)}
+                      style={{
+                        padding: "8px 14px", borderRadius: 10,
+                        border: `1px solid ${creditsApplied === 0 ? B.border : B.border}`,
+                        background: creditsApplied === 0 ? `rgba(255,255,255,0.06)` : B.bg,
+                        color: B.textMuted,
+                        fontSize: 13, fontFamily: SANS, fontWeight: 600, cursor: "pointer",
+                      }}
+                    >
+                      None
+                    </button>
+                  </div>
+
+                  {/* Savings callout */}
+                  {creditsApplied > 0 && (
+                    <div style={{ background: `${B.cyan}12`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 15 }}>✓</span>
+                      <span style={{ ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600 }}>
+                        Saving ${creditsApplied} today — ${USER_CREDITS - creditsApplied} remaining after booking
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Membership upsell hint */}
             <div style={{ background: `${B.gold}08`, border: `1px solid ${B.gold}25`, borderRadius: 12, padding: "12px 16px", marginBottom: 20 }}>
               <div style={{ ...T.ui, fontSize: 12, color: B.gold, fontWeight: 600, marginBottom: 4 }}>
                 💎 Members save ${treatment ? Math.round(treatment.price * 0.25 / 100) : "—"}
@@ -243,7 +389,7 @@ export function BookingScreen({ slug, onClose, onConfirmed }: BookingScreenProps
             </div>
 
             <Btn fullWidth style={{ padding: "15px 0", fontSize: 14 }} onClick={handleConfirm}>
-              CONFIRM BOOKING
+              {totalDue === 0 ? "CONFIRM — FREE WITH CREDITS" : `CONFIRM & PAY $${totalDue}`}
             </Btn>
 
             <div style={{ ...T.body, fontSize: 11, color: B.textMuted, textAlign: "center", marginTop: 12 }}>
