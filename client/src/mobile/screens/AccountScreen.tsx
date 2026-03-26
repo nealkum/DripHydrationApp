@@ -27,9 +27,9 @@ const sections = [
 
 const links = [
   { label: "Membership & Plan",               icon: "💎", action: "membership" },
-  { label: "Referral Program — Give $25, Get $25", icon: "🎁", action: null },
-  { label: "Medical Profile",                  icon: "🏥", action: null },
-  { label: "Help & FAQ",                       icon: "❓", action: null },
+  { label: "Referral Program — Give $25, Get $25", icon: "🎁", action: "referral" },
+  { label: "Medical Profile",                  icon: "🏥", action: "edit-profile" },
+  { label: "Help & FAQ",                       icon: "❓", action: "help" },
   { label: "About Drip Hydration",             icon: "ℹ️", action: null },
   { label: "Privacy & Terms",                  icon: "🔒", action: null },
 ];
@@ -85,7 +85,7 @@ export function AccountScreen({ navigate }: NavProps) {
             <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${B.borderLight}` }}>
               <span style={{ fontSize: 15 }}>{s.icon}</span>
               <span style={{ ...T.ui, fontSize: 14, fontWeight: 700, color: B.textPrimary }}>{s.title}</span>
-              <span style={{ marginLeft: "auto", ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>Edit</span>
+              <span onClick={() => navigate({ type: "edit-profile" })} style={{ marginLeft: "auto", ...T.ui, fontSize: 12, color: B.cyan, fontWeight: 600, cursor: "pointer" }}>Edit</span>
             </div>
             {s.items.map((it, j) => (
               <div
@@ -105,7 +105,12 @@ export function AccountScreen({ navigate }: NavProps) {
           {links.map((l, i) => (
             <div
               key={i}
-              onClick={() => l.action === "membership" && navigate({ type: "membership" })}
+              onClick={() => {
+                if (l.action === "membership") navigate({ type: "membership" });
+                else if (l.action === "referral") navigate({ type: "referral" });
+                else if (l.action === "help") navigate({ type: "help" });
+                else if (l.action === "edit-profile") navigate({ type: "edit-profile" });
+              }}
               style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", borderBottom: i < links.length - 1 ? `1px solid ${B.borderLight}` : "none", cursor: "pointer" }}
             >
               <span style={{ fontSize: 15 }}>{l.icon}</span>

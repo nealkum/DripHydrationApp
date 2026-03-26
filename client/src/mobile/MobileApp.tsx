@@ -9,13 +9,19 @@ import { BookingScreen } from "./screens/BookingScreen";
 import { TreatmentDetailScreen } from "./screens/TreatmentDetailScreen";
 import { MembershipScreen } from "./screens/MembershipScreen";
 import { NotificationsScreen } from "./screens/NotificationsScreen";
+import { ReferralScreen } from "./screens/ReferralScreen";
+import { HelpScreen } from "./screens/HelpScreen";
+import { EditProfileScreen } from "./screens/EditProfileScreen";
 
 export type TabId = "home" | "tx" | "bk" | "ord" | "acc";
 
 export type NavScreen =
   | { type: "treatment-detail"; slug: string }
   | { type: "membership" }
-  | { type: "notifications" };
+  | { type: "notifications" }
+  | { type: "referral" }
+  | { type: "help" }
+  | { type: "edit-profile" };
 
 export interface NavProps {
   navigate: (screen: NavScreen) => void;
@@ -95,6 +101,15 @@ export function MobileApp() {
         )}
         {currentScreen?.type === "notifications" && (
           <NotificationsScreen {...navProps} />
+        )}
+        {currentScreen?.type === "referral" && (
+          <ReferralScreen {...navProps} />
+        )}
+        {currentScreen?.type === "help" && (
+          <HelpScreen {...navProps} />
+        )}
+        {currentScreen?.type === "edit-profile" && (
+          <EditProfileScreen {...navProps} />
         )}
 
         {/* Booking overlay */}

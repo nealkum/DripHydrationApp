@@ -240,7 +240,7 @@ export function TreatmentDetailScreen({ slug, goBack, openBooking }: TreatmentDe
             <div style={{ ...T.body, fontSize: 12, color: B.textSecondary, marginBottom: 14 }}>
               Members pay <span style={{ color: B.cyan, fontWeight: 700 }}>${memberPrice}</span> per session. Cancel anytime, HSA/FSA eligible.
             </div>
-            <Btn variant="ghost" style={{ width: "100%", padding: "11px 0", fontSize: 12 }}>
+            <Btn variant="ghost" style={{ width: "100%", padding: "11px 0", fontSize: 12 }} onClick={() => navigate({ type: "membership" })}>
               VIEW MEMBERSHIP PLANS
             </Btn>
           </div>
