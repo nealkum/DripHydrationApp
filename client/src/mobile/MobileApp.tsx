@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { B, SANS } from "./theme";
 import { TabBar } from "./components/TabBar";
 import { HomeScreen } from "./screens/HomeScreen";
@@ -46,8 +46,14 @@ export function MobileApp() {
   const [tab, setTab] = useState<TabId>("home");
   const [navStack, setNavStack] = useState<NavScreen[]>([]);
   const [booking, setBooking] = useState<{ open: boolean; slug?: string }>({ open: false });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const currentScreen = navStack[navStack.length - 1] ?? null;
+
+  // Scroll browser window back to top whenever a new screen layer opens
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [navStack.length, booking.open]);
 
   function navigate(screen: NavScreen) {
     setNavStack((prev) => [...prev, screen]);
@@ -68,6 +74,10 @@ export function MobileApp() {
     }
     setTab(id);
     setNavStack([]);
+    // Reset the shared scroll container so each tab starts at the top
+    requestAnimationFrame(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    });
   }
 
   function handleBookingConfirmed(details: BookingConfirmation) {
@@ -99,7 +109,7 @@ export function MobileApp() {
         </div>
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", paddingBottom: currentScreen ? 0 : 84 }}>
+        <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", overflowX: "hidden", paddingBottom: currentScreen ? 0 : 84 }}>
           {tab === "home" && <HomeScreen {...navProps} />}
           {tab === "tx" && <TreatmentsScreen {...navProps} />}
           {tab === "ord" && <OrdersScreen {...navProps} />}
